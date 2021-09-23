@@ -1,0 +1,419 @@
+
+################## PICKLING code #####################################################################################
+
+%pylab inline
+
+
+import numpy as np
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from IPython.display import display
+
+from sklearn.metrics import confusion_matrix, f1_score, precision_recall_curve
+from sklearn.model_selection import GridSearchCV, train_test_split,cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import classification_report
+
+
+import xgboost as xgb
+import lightgbm as lgb
+
+import warnings
+warnings.filterwarnings("ignore")
+
+from collections import Counter
+import itertools
+from sklearn.preprocessing import LabelBinarizer
+import boruta
+import shapely
+# Set all options
+%matplotlib inline
+plt.style.use('seaborn-notebook')
+plt.rcParams["figure.figsize"] = (20, 3)
+pd.options.display.float_format = '{:20,.4f}'.format
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+sns.set(context="paper", font="monospace")
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# Example: load a DSS dataset as a Pandas dataframe
+mydataset = dataiku.Dataset("Customer_profile_df_1")
+mydataset_df = mydataset.get_dataframe()
+df = mydataset_df
+df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# older list with rfc_cols
+
+model_cols=list([
+# target feature
+"INACTIVITY_LABEL",
+
+# label for numbers
+"NR_SBSC",
+
+# usage features
+"AALLGROSSREVENUEM0","AALLGROSSREVENUEM1","AALLGROSSREVENUEM2",
+
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.loc[:,model_cols]
+df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.drop_duplicates()
+df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# df = df.drop(['NR_SBSC'], axis=1)
+df_model = df
+
+X_test = df_model.drop(['INACTIVITY_LABEL'], axis=1)
+y_test = df_model[['INACTIVITY_LABEL',"NR_SBSC"]]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_not_needed, X_model, y_not_needed, y_model =train_test_split(X_test,y_test,test_size=0.1,random_state=11,stratify=y_test.INACTIVITY_LABEL)
+X_not_needed_1, X_model_extra, y_not_needed_1, y_model_extra =train_test_split(X_not_needed,y_not_needed,test_size=0.2,random_state=11,stratify=y_not_needed.INACTIVITY_LABEL)
+# X_not_needed_2, X_model_extra_2, y_not_needed_2, y_model_extra_2 =train_test_split(X_not_needed,y_not_needed,test_size=0.1,random_state=11,stratify=y_not_needed.INACTIVITY_LABEL)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_data_extra = pd.merge(X_model_extra, y_model_extra, how="inner", on=["NR_SBSC"])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_data_extra = X_data_extra[X_data_extra['INACTIVITY_LABEL']==1]
+X_test_extra = X_data_extra.drop(['INACTIVITY_LABEL'], axis=1)
+y_test_extra = X_data_extra[['INACTIVITY_LABEL',"NR_SBSC"]]
+
+# made a change today - 18th feb 2021
+# reducing the event rate for xgb and lgb
+# keeping it constant for rfc
+# will do a testing
+
+X_model1 = X_model
+y_model1 = y_model
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_model = X_model.append(X_test_extra,ignore_index=True)
+y_model = y_model.append(y_test_extra,ignore_index=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = X_model
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+del X_not_needed
+del y_not_needed
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df['DAYS_ACTIVE_MORETHAN30_ALL'] = np.where((df['NALLDOUM0']+df['NALLDOUM1']+df['NALLDOUM2'])>30, 1, 0)
+
+
+# df = df.drop(["AGSMGROSSREVENUEM0","AGSMGROSSREVENUEM1","AGSMGROSSREVENUEM2"], axis=1)
+
+
+# df = df.drop(["AAVGBALANCEMPESAM1","AAVGBALANCEMPESAM2","AAVGBALANCEMPESAM3",'AAVGBALANCEMPESAL2M','AAVGBALANCEMPESAL3M'], axis=1)
+
+# charged mpesa
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.fillna(0)
+df = df.replace(np.inf, 0)
+# df = df.clip(df.quantile(0.0005), df.quantile(0.9995),axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result = pd.merge(df, y_model, how="inner", on=["NR_SBSC"])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result = result.drop(['NR_SBSC'], axis=1)
+df_model = result
+
+X_test = df_model.drop(['INACTIVITY_LABEL'], axis=1)
+y_test = df_model[['INACTIVITY_LABEL',]]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_train_model, X_test_model, y_train_model, y_test_model =train_test_split(X_test,y_test,test_size=0.2,random_state=11,stratify=y_test)
+
+print(X_train_model.shape, y_train_model.shape, X_test_model.shape, y_test_model.shape)
+
+# code for the xgb and lgb datasets
+
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = X_model1
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df['DAYS_ACTIVE_MORETHAN30_ALL'] = np.where((df['NALLDOUM0']+df['NALLDOUM1']+df['NALLDOUM2'])>30, 1, 0)
+
+df = df.drop(["NUNIQUEGAMBLINGORGSMPESAL3M",'NUNIQUEGAMBLINGORGSMPESAL3M', 'NUNIQUEGAMBLINGORGSMPESAM1', 'NUNIQUEGAMBLINGORGSMPESAM2', 'NUNIQUEGAMBLINGORGSMPESAM3'], axis=1)
+
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.fillna(0)
+df = df.replace(np.inf, 0)
+# df = df.clip(df.quantile(0.0005), df.quantile(0.9995),axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result1 = pd.merge(df, y_model1, how="inner", on=["NR_SBSC"])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result1 = result1.drop(['NR_SBSC'], axis=1)
+df_model1 = result1
+
+X_test1 = df_model1.drop(['INACTIVITY_LABEL'], axis=1)
+y_test1 = df_model1[['INACTIVITY_LABEL',]]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_train_model1, X_test_model1, y_train_model1, y_test_model1 =train_test_split(X_test1,y_test1,test_size=0.2,random_state=11,stratify=y_test1)
+
+print(X_train_model1.shape, y_train_model1.shape, X_test_model1.shape, y_test_model1.shape)
+
+
+
+print(X_train_model1.shape,y_train_model1.shape)
+print(X_train_model.shape,y_train_model.shape)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+classifier_xgb = xgb.XGBClassifier(n_estimators=500,learning_rate=0.3,random_state=11, max_depth = 5,colsample_bytree=0.8,subsample=0.7,gamma=5)
+classifier_xgb.fit(X_train_model,y_train_model)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+rfc=RandomForestClassifier(n_estimators=500,max_depth=24,random_state=11,min_samples_split=4,criterion='gini',n_jobs=-1)
+rfc.fit(X_train_model, y_train_model)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+mdl = lgb.LGBMClassifier(boosting_type= 'gbdt',learning_rate=0.3,n_estimators=500,objective = 'binary',max_depth =-1,num_leaves=31,max_bin=512,subsample_for_bin=200,subsample=0.7,subsample_freq=1,colsample_bytree=0.65,reg_alpha=8,reg_lambda=1)
+mdl.fit(X_train_model,y_train_model)
+
+rfc
+
+mdl
+
+classifier_xgb
+
+import pickle
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/lgb.pkl','wb') as f:
+     pickle.dump(mdl,f)
+
+import pickle
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/rfc.pkl','wb') as f:
+     pickle.dump(rfc,f)
+
+import pickle
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/xgb.pkl','wb') as f:
+     pickle.dump(classifier_xgb,f)
+
+import pickle
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/lgb.pkl','rb') as f:
+     cl2  =pickle.load(f)
+
+cl2
+
+
+**********************8**********************8**********************8**********************8**********************8**********************8
+**********************8**********************8**********************8**********************8**********************8**********************8
+
+################################# micro segmentation with H2o- saving and loading##############################################
+
+seg_production_df = fullbase_ones_seg_df # For this sample code, simply copy input to output
+
+df=seg_production_df
+
+df.drop_duplicates(inplace=True)
+df.shape
+
+len(np.unique(df.NR_SBSC))
+
+df_=df.drop_duplicates(subset='NR_SBSC', keep='first')
+len(df_)
+
+list(df_.columns)
+
+## for voice
+# df_1=df.loc[:,["NR_SBSC",..
+
+### for data
+# df_data=df.loc[:,["NR_SBSC"..
+
+
+df_1.isnull().sum()
+
+# df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+# df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+# df_3=df_3.fillna(df_3.mean()[cols])
+# df_3=df_3.fillna(df_3.median()[cols])
+
+df_2=df_1.fillna(0)
+print(df_2.isnull().sum().sum())
+df_2.head()
+
+# import sklearn
+# from sklearn.preprocessing import StandardScaler, normalize
+# df_3=StandardScaler().fit_transform(df_2) or
+# df_3=preprocessing.scale(df_2)
+
+df_4_=pd.DataFrame(df_2)
+df_4_.describe()
+
+# df_4.columns=df_2.columns
+
+df_4= df_4_
+
+df_4.head()
+
+NR_SBSC_Priority=df_4_.iloc[:,0:2]
+NR_SBSC_Priority.head()
+
+##http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/k-means.html - simple code
+### https://www.h2o.ai/wp-content/uploads/2018/01/Python-BOOKLET.pdf -- only about h20
+### https://gist.github.com/ledell/7430ee045ae32210f656709ac3b80209 ---R
+### https://anaconda.org/koverholt/h2o-kmeans-clustering/notebook -- code-good
+### http://docs.h2o.ai/h2o/latest-stable/h2o-r/docs/reference/h2o.kmeans.html --parameters
+### https://www.h2o.ai/wp-content/uploads/2018/01/Python-BOOKLET.pdf -- with code and explanation
+### https://docs.h2o.ai/h2o/latest-stable/h2o-py/docs/_modules/h2o/estimators/kmeans.html - detailed
+### https://www.opensourceforu.com/2016/02/h2o-ai-learn-to-use-the-kmeans-algorithm/ -- detailed code
+### https://dzone.com/articles/setting-stopping-criteria-into-h2o-k-means --setting stopping criteria
+### https://jangorecki.gitlab.io/r-talks/2017-04-03_Varanasi_Machine-Learning/04-Machine-Learning.pdf  ---- very good-R
+### http://docs.h2o.ai/h2o/latest-stable/h2o-r/docs/reference/h2o.kmeans.html - parameters details--R
+
+import h2o
+
+h2o.init()
+
+from h2o.estimators.kmeans import H2OKMeansEstimator
+
+frame = h2o.H2OFrame(df_4)
+
+frame
+
+# df_4.columns[1:]
+
+# cluster_estimator = H2OKMeansEstimator(k=4)
+# cluster_estimator.train(x=frame.col_names[1:],training_frame= frame)
+
+# cluster_estimator
+
+# results = [H2OKMeansEstimator(k=clusters, init="Random", seed=2, standardize=True) for clusters in range(1,7)]
+# for estimator in results:
+#     estimator.train(x=frame.col_names[2:], training_frame = frame)
+
+# import math as math
+
+# def diagnostics_from_clusteringmodel(model):
+#     total_within_sumofsquares = model.tot_withinss()
+#     number_of_clusters = len(model.centers())
+#     number_of_dimensions = len(model.centers()[0])
+#     number_of_rows = sum(model.size())
+
+#     aic = total_within_sumofsquares + 2 * number_of_dimensions * number_of_clusters
+#     bic = total_within_sumofsquares + math.log(number_of_rows) * number_of_dimensions * number_of_clusters
+#     print("aic..",aic)
+#     print("bic..",bic)
+#     print("total_within_sumofsquares",total_within_sumofsquares)
+#     return {'Clusters':number_of_clusters,
+#             'Total Within SS':total_within_sumofsquares,
+#             'AIC':aic,
+#             'BIC':bic}
+
+# diagnostics = pd.DataFrame( [diagnostics_from_clusteringmodel(model) for model in results])
+# diagnostics.set_index('Clusters', inplace=True)
+# diagnostics.plot(kind='line');
+
+### optimal cluster from silhouette width- 2( 0.99 score) then 3(0.98 score)
+
+import h2o
+# from h2o.estimators import H2OKMeansEstimator
+h2o.init()
+
+# # Import the iris dataset into H2O:
+# iris = h2o.import_file("http://h2o-public-test-data.s3.amazonaws.com/smalldata/iris/iris_wheader.csv")
+
+# # Set the predictors:
+# predictors = ["sepal_len", "sepal_wid", "petal_len", "petal_wid"]
+
+# # Split the dataset into a train and valid set:
+# train, valid = frame(ratios=[.8], seed=1234)
+
+ # Build and train the model:
+ iris_kmeans = H2OKMeansEstimator(k=4,
+                                  estimate_k=True,
+                                  standardize=False,
+                                  seed=1234)
+
+ iris_kmeans.train(x=frame.col_names[2:],
+                   training_frame=frame,
+                   validation_frame=frame)
+
+ # Eval performance:
+ perf = iris_kmeans.model_performance()
+
+
+
+saved_model = h2o.load_model("/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/KMeans_model_python_1615472902612_7")
+
+# CALL THE MODEL
+
+iris_kmeans= saved_model
+
+#  Generate predictions on a validation set (if necessary):
+pred = iris_kmeans.predict(frame)
+
+# type(pred)
+# df_pred=df_1
+# df_pred['cluster']=list(pred)
+# df_1.insert(2,'pred',pred,True)
+
+frame['pred']=pred
+
+frame.head()
+
+frame.shape
+
+cols=frame.columns
+cols
+
+frame_1=frame.group_by(by='pred').mean(cols, na='ignore').get_frame()
+# air[cols_1].group_by(by='Origin').sum(cols_2, na="ignore").get_frame()
+
+frame_1_voice_agg=frame_1
+frame_1_voice=frame
+frame_1_voice_agg
+# group 4 and 3 --high on voice and data - if a customer is high on voice he is certaily high on data as well
+
+
+## data
+# frame_1_data_agg=frame_1
+# frame_1_data= frame
+
+
+# frame_1_voice_df=pd.DataFrame(frame_1_voice)
+
+h2o.shutdown
+frame_1_voice_df=h2o.as_list(frame_1_voice)
+frame_1_voice_agg_df=h2o.as_list(frame_1_voice_agg)
+# pd_frame_agg=h2o.as_list(frame_1)
+
+
+
+frame_1_voice_df.head()
+
+frame_1_voice_df.shape
+
+frame_1_voice_df['GROUP']=frame_1_voice_df['pred']
+
+frame_1_voice_df['Group_'] = pd.DataFrame(np.where((frame_1_voice_df['GROUP']==0),'LVC',np.where((frame_1_voice_df['GROUP']==1),'MVC', np.where((frame_1_voice_df['GROUP']==2),'HVC','VHVC'))))
+
+frame_1_voice_df.head()
+
+df_bi = frame_1_voice_df[["NR_SBSC",'Priority',"pred","GROUP","Group_"]]
+
+df_bi.head()
+
+df_bi.columns = ["NR_SBSC",'PRIORITY','PREDICTION','GROUP_INDEX','GROUP_NAME']

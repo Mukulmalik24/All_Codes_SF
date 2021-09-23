@@ -1,0 +1,2204 @@
+********************************* Out;ier treatment *************************************************************************
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+ud_outliers_removed_df = voice_Inact_Features_df_df # For this sample code, simply copy input to output
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = ud_outliers_removed_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.clip(df.quantile(0.01), df.quantile(0.975),axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.describe()
+ud_outliers_removed=df
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+******************************************************************************************************************************
+******************************************************************************************************************************
+
+
+
+########################################3 Missing value treatment########################################3#########################
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# -*- coding: utf-8 -*-
+import dataiku
+import pandas as pd, numpy as np
+from dataiku import pandasutils as pdu
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# Import warnings and add a filter to ignore them
+import warnings
+warnings.simplefilter('ignore')
+# Import XGBoost
+#import xgboost
+# XGBoost Classifier
+#from xgboost import XGBClassifier
+# Classification report and confusion matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+# Cross validation
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+# Pandas datareader to get the data
+# from pandas_datareader import data
+# To plot the graphs
+#import matplotlib.pyplot as plt
+#import seaborn as sn
+# For data manipulation
+import pandas as pd
+import numpy as np
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+mm_cleaning_df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df=mm_cleaning_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.isnull().sum().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.isnull().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3=df ################### REVISIT , removing the columns will be doe in mm_dev
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# # removing GAMBLINGMPESA - as it has70% missing values
+# aa=[cols for cols  in df.columns if cols not in ['AGAMBLINGMPESAM0','AGAMBLINGMPESAM1','AGAMBLINGMPESAM2','NGAMBLINGMPESAM0','NGAMBLINGMPESAM1','NGAMBLINGMPESAM2','NGAMBLINGMPESAL2M','NGAMBLINGMPESAL3M','AGAMBLINGMPESAL2M','AGAMBLINGMPESAL3M','AAVGGAMBLINGMPESAL2M','AAVGGAMBLINGMPESAL3M']]
+# df_1=df[aa]
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# ### ----   Missing value treatment ----
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3.isnull().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# ##### AALLGROSSREVENUEM2 missing values could be filled NALLDOUM2
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# #NALLDOUM2 - AALLGROSSREVENUEM2
+# 0-3 --7
+# 3-6 -- 50
+# 6-9 --103
+# 9-12 --162
+# 12-15 --225
+# 15-18 --303
+# 18-21 --405
+# 21-24 --524
+# 24-27 --710
+# 27-30 -- 1908
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3['AALLGROSSREVENUEM2']=np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<3),7,
+         np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<6),50,
+                  np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<9),103,
+                          np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<12),162,
+                                  np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<15),225,
+                                          np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<18),303,
+                                                  np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<21),405,
+                                                          np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<24),524,
+                                                                  np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']<27),710,
+                                                                           np.where((df_3['AALLGROSSREVENUEM2'].isnull()) & (df_3['NALLDOUM2']>27),1908,df_3['AALLGROSSREVENUEM2'].mean()))))))))))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NOKOAINTERNETM0','NOKOAINTERNETM1','NOKOAINTERNETM2']
+df_3=df_3.fillna(df_3.median()[cols])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NOTHERRECHARGEM0','NOTHERRECHARGEM1','NOTHERRECHARGEM2']
+df_3=df_3.fillna(df_3.median()[cols])
+# df_3['NOTHERRECHARGEM0'].fillna(df_3['NOTHERRECHARGEM0'].median(),inplace=True)
+# df_3['NOTHERRECHARGEM1'].fillna(df_3['NOTHERRECHARGEM1'].median(),inplace=True)
+# df_3['NOTHERRECHARGEM2'].fillna(df_3['NOTHERRECHARGEM2'].median(),inplace=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# #### AOTHERRECHARGEM0, M1, M2 - 94 % customer doesnt recharge with this, missing values to be filled with median -'0'
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['AOTHERRECHARGEM0','AOTHERRECHARGEM1','AOTHERRECHARGEM2']
+df_3=df_3.fillna(df_3.median()[cols])
+# df_3['AOTHERRECHARGEM0'].fillna(df_3['AOTHERRECHARGEM0'].median(),inplace=True)
+# df_3['AOTHERRECHARGEM1'].fillna(df_3['AOTHERRECHARGEM1'].median(),inplace=True)
+# df_3['AOTHERRECHARGEM2'].fillna(df_3['AOTHERRECHARGEM2'].median(),inplace=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NALLDOUM0','NALLDOUM1','NALLDOUM2']
+
+df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3['NDATADOUM0']=np.where((df_3['NDATADOUM0'].isnull()) & (df_3['NDATAMBSM0']<78000),10,
+         np.where((df_3['NDATADOUM0'].isnull()) & (df_3['NDATAMBSM0']>=78000),29,df_3['NDATADOUM0'].mean()))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#### NDATADOUM1  missing value can be filled with NDATAMBSM1
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# rarely having missing values - to be filled with mean /median
+cols = ["AOTHERGROSSREVENUEM0", "AOTHERGROSSREVENUEM1",'AOTHERGROSSREVENUEM2',
+        'ACALLSALLREVENUEM0','ACALLSALLREVENUEM1','ACALLSALLREVENUEM2',
+        'ASMSREVENUEM0','ASMSREVENUEM1','ASMSREVENUEM2',
+       'NCALLSALLMINUTESM0','NCALLSALLMINUTESM1','NCALLSALLMINUTESM2',]
+
+df_3=df_3.fillna(df_3.mean()[cols])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# rarely having missing values - to be filled with mean /median
+cols= [  'NOTHERDOUM0','NOTHERDOUM1','NOTHERDOUM2',#median
+        'NGSMDOUM0','NGSMDOUM1','NGSMDOUM2', #median
+        'NCALLSDOUM0','NCALLSDOUM1','NCALLSDOUM2', # median
+        'NSMSDOUM0','NSMSDOUM1','NSMSDOUM2'] #median
+
+df_3=df_3.fillna(df_3.median()[cols])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NSMSQTYM0','NSMSQTYM1','NSMSQTYM2']
+
+df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# d=pd.DataFrame({'a':[1,np.nan,4,4,8,10],'b':[10,20,np.nan,20,50,55],'c':[9,9,8,7,3,np.nan]},columns=['a','b','c'])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# import pandas as pd
+# import numpy as np
+# d=pd.DataFrame({'a':['b',np.nan,'z','z'],'b':['c',np.nan,'d','d'],'c':['a','b','a',np.nan]},columns=['a','b','c'])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# # only works for mean and median
+# l=['a']
+# # l1=['d.a','d.b']
+# d=d.fillna(d.mean()[l])
+# d
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# #works for mode only
+# cols = ["a", "b"]
+# d[cols]=d[cols].fillna(d.mode().iloc[0])
+# d
+
+
+
+
+****************************************************************************************************************
+**********************************************************************************************************************
+
+*********************************** Cleaning -mm **********************************************************************************
+#
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# Import warnings and add a filter to ignore them
+import warnings
+warnings.simplefilter('ignore')
+# Import XGBoost
+#import xgboost
+# XGBoost Classifier
+#from xgboost import XGBClassifier
+# Classification report and confusion matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+# Cross validation
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+# Pandas datareader to get the data
+# from pandas_datareader import data
+# To plot the graphs
+import matplotlib.pyplot as plt
+#import seaborn as sn
+# For data manipulation
+import pandas as pd
+import numpy as np
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+mm_cleaning_df.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df=mm_cleaning_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.isnull().sum().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.isnull().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removing GAMBLINGMPESA - as it has70% missing values
+aa=[cols for cols  in df.columns if cols not in ['AGAMBLINGMPESAM0','AGAMBLINGMPESAM1','AGAMBLINGMPESAM2','NGAMBLINGMPESAM0','NGAMBLINGMPESAM1','NGAMBLINGMPESAM2','NGAMBLINGMPESAL2M','NGAMBLINGMPESAL3M','AGAMBLINGMPESAL2M','AGAMBLINGMPESAL3M','AAVGGAMBLINGMPESAL2M','AAVGGAMBLINGMPESAL3M']]
+df_1=df[aa]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NETURECHARGEM0','NETURECHARGEM1','NETURECHARGEM2']
+# df_3['NETURECHARGEM0'].fillna(df_3['NETURECHARGEM0'].mean(), inplace=True)
+# df_3['NETURECHARGEM1'].fillna(df_3['NETURECHARGEM1'].mean(), inplace=True)
+# df_3['NETURECHARGEM2'].fillna(df_3['NETURECHARGEM2'].mean(), inplace=True)
+df_3=df_3.fillna(df_3.mean()[cols])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NOKOAINTERNETM0','NOKOAINTERNETM1','NOKOAINTERNETM2']
+df_3=df_3.fillna(df_3.median()[cols])
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['AOTHERRECHARGEM0','AOTHERRECHARGEM1','AOTHERRECHARGEM2']
+df_3=df_3.fillna(df_3.median()[cols])
+# df_3['AOTHERRECHARGEM0'].fillna(df_3['AOTHERRECHARGEM0'].median(),inplace=True)
+# df_3['AOTHERRECHARGEM1'].fillna(df_3['AOTHERRECHARGEM1'].median(),inplace=True)
+# df_3['AOTHERRECHARGEM2'].fillna(df_3['AOTHERRECHARGEM2'].median(),inplace=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# #### NALLDOUM0, NALLDOUM1, NALLDOUM2 missing can be filled with AALLGROSSREVENUEM0 ----- to be checked-missing rows to be deleted,filled with mode-30%-0
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NALLDOUM0','NALLDOUM1','NALLDOUM2']
+
+df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3['NDATADOUM0']=np.where((df_3['NDATADOUM0'].isnull()) & (df_3['NDATAMBSM0']<78000),10,
+         np.where((df_3['NDATADOUM0'].isnull()) & (df_3['NDATAMBSM0']>=78000),29,df_3['NDATADOUM0'].mean()))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# rarely having missing values - to be filled with mean /median
+cols = ["AOTHERGROSSREVENUEM0", "AOTHERGROSSREVENUEM1",'AOTHERGROSSREVENUEM2',
+        'ACALLSALLREVENUEM0','ACALLSALLREVENUEM1','ACALLSALLREVENUEM2',
+        'ASMSREVENUEM0','ASMSREVENUEM1','ASMSREVENUEM2',
+       'NCALLSALLMINUTESM0','NCALLSALLMINUTESM1','NCALLSALLMINUTESM2',]
+
+df_3=df_3.fillna(df_3.mean()[cols])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# #### rarely having missing values - to be filled with median
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# rarely having missing values - to be filled with mean /median
+cols= [  'NOTHERDOUM0','NOTHERDOUM1','NOTHERDOUM2',#median
+        'NGSMDOUM0','NGSMDOUM1','NGSMDOUM2', #median
+        'NCALLSDOUM0','NCALLSDOUM1','NCALLSDOUM2', # median
+        'NSMSDOUM0','NSMSDOUM1','NSMSDOUM2'] #median
+
+df_3=df_3.fillna(df_3.median()[cols])
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cols=['NSMSQTYM0','NSMSQTYM1','NSMSQTYM2']
+
+df_3[cols]=df_3[cols].fillna(df_3.mode().iloc[0])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_3['NSMSQTYM0']=np.where((df_3['NSMSQTYM0'])<6,0,
+                           np.where((df_3['NSMSQTYM0']<100),1,
+                           np.where((df_3['NSMSQTYM0']>100),2,0)))
+**********************************************************************************************************************88
+*******************************************************************************************************************************
+
+*********************** xgb-trainig, over-under sampling, boruta
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# -*- coding: utf-8 -*-
+import dataiku
+import pandas as pd, numpy as np
+from dataiku import pandasutils as pdu
+
+# Read recipe inputs
+ud_new_features = dataiku.Dataset("ud_new_features")
+ud_new_features_df = ud_new_features.get_dataframe()
+
+
+# Compute recipe outputs from inputs
+# TODO: Replace this part by your actual code that computes the output, as a Pandas dataframe
+# NB: DSS also supports other kinds of APIs for reading and writing data. Please see doc.
+
+mm_model_Dev_df = ud_new_features_df # For this sample code, simply copy input to output
+
+
+# # Write recipe outputs
+# mm_model_Dev = dataiku.Dataset("mm_model_Dev")
+# mm_model_Dev.write_with_schema(mm_model_Dev_df)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df=mm_model_Dev_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df.isnull().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df1=df.loc[:,['NR_SBSC','YAGE','GENDER','MSINCEREGISTRNETWORK','R1_AALLGROSSREVENUEM0','R2_AALLGROSSREVENUEM0','R3_AALLGROSSREVENUEM0',
+              'R1_NALLDOUM0','R2_NALLDOUM0','R3_NALLDOUM0',
+              'ABONGAM0','ABONGAM1','ABONGAM2', ## to be removed
+              'NETUBLACKLISTM0','NETUBLACKLISTM1','NETUBLACKLISTM2','R1_ADATACOSTM0','R2_ADATACOSTM0','R3_ADATACOSTM0',
+              'R1_NDATAMBSM0','R2_NDATAMBSM0','R3_NDATAMBSM0','R1_NDATADOUM0','R2_NDATADOUM0','R3_NDATADOUM0',
+              'R1_NETURECHARGEM0','R2_NETURECHARGEM0','R3_NETURECHARGEM0','R1_AETURECHARGEM0','R2_AETURECHARGEM0','R3_AETURECHARGEM0',
+              'GSMA_CLASS_FEATUREPHONE','GSMA_CLASS_HANDHELD','GSMA_CLASS_MOBILE_FEATURE','GSMA_CLASS_SMARTPHONE',
+              'R1_NOKOAINTERNETM0','R2_NOKOAINTERNETM0','R3_NOKOAINTERNETM0',
+              'R1_AOKOAINTERNETM0','R2_AOKOAINTERNETM0','R3_AOKOAINTERNETM0',
+              'MARKET_SEGMENT_DP','MARKET_SEGMENT_HUSTLER','MARKET_SEGMENT_MASS','MARKET_SEGMENT_UNCLASS','MARKET_SEGMENT_YOUTH',
+              'R1_NMPESARECHARGEM0','R2_NMPESARECHARGEM0','R3_NMPESARECHARGEM0',
+              'R1_AMPESARECHARGEM0','R2_AMPESARECHARGEM0','R3_AMPESARECHARGEM0','R1_NMPESADOUM0','R2_NMPESADOUM0','R3_NMPESADOUM0',
+              'R1_AMPESAGROSSM0','R2_AMPESAGROSSM0','R3_AMPESAGROSSM0','R1_NOTHERRECHARGEM0','R2_NOTHERRECHARGEM0','R3_NOTHERRECHARGEM0',
+              'R1_AOTHERRECHARGEM0','R2_AOTHERRECHARGEM0','R3_AOTHERRECHARGEM0',
+              'R1_AOTHERGROSSREVENUEM0','R2_AOTHERGROSSREVENUEM0','R3_AOTHERGROSSREVENUEM0',
+              'R1_NOTHERDOUM0','R2_NOTHERDOUM0','R3_NOTHERDOUM0','R1_AGSMGROSSREVENUEM0','R2_AGSMGROSSREVENUEM0','R3_AGSMGROSSREVENUEM0',
+              'R1_NGSMDOUM0','R2_NGSMDOUM0','R3_NGSMDOUM0','R1_ACALLSALLREVENUEM0','R2_ACALLSALLREVENUEM0','R3_ACALLSALLREVENUEM0',
+              'R1_NCALLSALLMINUTESM0','R2_NCALLSALLMINUTESM0','R3_NCALLSALLMINUTESM0','R1_NCALLSDOUM0','R2_NCALLSDOUM0','R3_NCALLSDOUM0',
+              'R1_ASMSREVENUEM0','R2_ASMSREVENUEM0','R3_ASMSREVENUEM0','R1_NSMSQTYM0','R2_NSMSQTYM0','R3_NSMSQTYM0',
+              'R1_NSMSDOUM0','R2_NSMSDOUM0','R3_NSMSDOUM0','R1_NVOUCHERRECHARGEM0','R2_NVOUCHERRECHARGEM0','R3_NVOUCHERRECHARGEM0',
+              'R1_AVOUCHERRECHARGEM0','R2_AVOUCHERRECHARGEM0','R3_AVOUCHERRECHARGEM0',
+              #'AGAMBLINGMPESAM0','AGAMBLINGMPESAM1','AGAMBLINGMPESAM2','AGAMBLINGMPESAL2M','AGAMBLINGMPESAL3M',
+              #'NGAMBLINGMPESAM0','NGAMBLINGMPESAM1','NGAMBLINGMPESAM2','NGAMBLINGMPESAL2M','NGAMBLINGMPESAL3M',
+              #'AAVGGAMBLINGMPESAL2M','AAVGGAMBLINGMPESAL3M',
+              'R1_AINP2PMPESAM0','R2_AINP2PMPESAM0','R3_AINP2PMPESAM0',
+              'AMAXINP2PMPESAL3M','R1_AINMPESAM0','R2_AINMPESAM0','R3_AINMPESAM0','AMAXINMPESAL3M',
+              'R1_AOUTMPESAM0','R2_AOUTMPESAM0','R3_AOUTMPESAM0','R2_NOUTTRANSACMPESAM0','R3_NOUTTRANSACMPESAM0',
+              #'APAYBILLMPESAM0','APAYBILLMPESAM1','APAYBILLMPESAM2','APAYBILLMPESAL2M','APAYBILLMPESAL3M',
+              #'AAVGPAYBILLMPESAL2M','AAVGPAYBILLMPESAL3M',
+              'LABEL']]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removing GAMBLINGMPESA - as it has70% missing values
+aa=[cols for cols  in df1.columns if cols not in ['AGAMBLINGMPESAM0','AGAMBLINGMPESAM1','AGAMBLINGMPESAM2','NGAMBLINGMPESAM0','NGAMBLINGMPESAM1','NGAMBLINGMPESAM2','NGAMBLINGMPESAL2M','NGAMBLINGMPESAL3M','AGAMBLINGMPESAL2M','AGAMBLINGMPESAL3M','AAVGGAMBLINGMPESAL2M','AAVGGAMBLINGMPESAL3M']]
+df2=df1[aa]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df2.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removing APAYBILLMPESAM0 - as it has 50% missing values
+bb=[cols for cols in df2.columns if cols not in ['APAYBILLMPESAM1','APAYBILLMPESAM2','AAVGPAYBILLMPESAL2M','AAVGPAYBILLMPESAL3M','APAYBILLMPESAL2M','APAYBILLMPESAL3M']]
+df3=df2[bb]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df3.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removing AINP2PMPESA,'AMAXINP2PMPESAL','AINMPESA',AMAXINMPESAL3M , APAYBILLMPESAM0 as they have 17% missing
+cc=[cols for cols in  df3.columns if cols not in ['AINP2PMPESAM0','AINP2PMPESAM1','AINP2PMPESAM2','AINP2PMPESAL2M','AINP2PMPESAL3M','AMAXINP2PMPESAL3M','AINMPESAM0','AINMPESAM1','AINMPESAM2','AINMPESAM2M','AINMPESAL2M','AINMPESAL3M','AMAXINMPESAL3M','APAYBILLMPESAM0']]
+df4=df3[cc]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df4.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removing age and gender
+dd=[cols for cols in df4.columns if cols not in['YAGE','GENDER','NR_SBSC']]
+df5=df4[dd]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5.isnull().sum()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# from collections import Counter
+# # from sklearn.datasets import make_classification
+# from sklearn.model_selection import train_test_split
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# ### XGB
+# #### #### https://appliedmachinelearning.blog/2018/09/23/data-analytics-and-modeling-with-xgboost-classifier-wns-hackathon-challenge/
+# #### https://www.kaggle.com/dstuerzer/optimization-of-xgboost#Maximized-Recall-for-given-Fallout
+# #### https://towardsdatascience.com/boosting-performance-with-xgboost-b4a8deadede7
+# #### https://machinelearningmastery.com/xgboost-for-imbalanced-classification/
+# #### https://towardsdatascience.com/boosting-techniques-in-python-predicting-hotel-cancellations-62b7a76ffa6c
+# 
+# #### https://machinelearningmastery.com/threshold-moving-for-imbalanced-classification/
+# #### https://scikit-learn.org/stable/modules/model_evaluation.html - for grid sarching scoring - fi, roc-auc,recall etc
+# #### https://towardsdatascience.com/fine-tuning-a-classifier-in-scikit-learn-66e048c21e65 - cutt off tuning
+# 
+# 
+# 
+# #### https://towardsdatascience.com/fine-tuning-a-classifier-in-scikit-learn-66e048c21e65  - random forest
+# #### https://www.kaggle.com/tilii7/boruta-feature-elimination --boruta with random forest
+# 
+# #### https://www.analyticsvidhya.com/blog/2019/08/11-important-model-evaluation-error-metrics/ - --lift and gain chart
+# #### http://rasbt.github.io/mlxtend/user_guide/evaluate/lift_score/ ----lift
+# 
+# #### https://towardsdatascience.com/the-ultimate-guide-to-binary-classification-metrics-c25c3627dd0a  -- evalution metrics --**
+# #### https://machinelearningmastery.com/feature-importance-and-feature-selection-with-xgboost-in-python/ --feature selection
+# #### https://towardsdatascience.com/boruta-explained-the-way-i-wish-someone-explained-it-to-me-4489d70e154a  -feature selection - boruta
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5.columns
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from IPython.display import display
+
+from sklearn.metrics import confusion_matrix, f1_score, precision_recall_curve
+from sklearn.model_selection import GridSearchCV, train_test_split,cross_val_score
+
+import xgboost as xgb
+#import lightgbm as lgb
+
+import warnings
+warnings.filterwarnings("ignore")
+
+from collections import Counter
+import itertools
+from sklearn.preprocessing import LabelBinarizer
+import boruta
+# Set all options
+%matplotlib inline
+plt.style.use('seaborn-notebook')
+plt.rcParams["figure.figsize"] = (20, 3)
+pd.options.display.float_format = '{:20,.4f}'.format
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+sns.set(context="paper", font="monospace")
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+lb = LabelBinarizer()
+df5['LABEL'] = lb.fit_transform(df['LABEL'].values)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X,y=df5.loc[:, df5.columns !='LABEL'] , df5.loc[:, ['LABEL']]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+plt.figure(figsize=(6,3))
+sns.countplot(x='LABEL',data=df5)
+plt.show()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print('X shape',X.shape)
+print('y shape',y.shape)
+X_train, X_test, y_train, y_test =train_test_split(X,y,test_size=0.3,random_state=11,stratify=y)
+print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
+# counter = Counter(y_train)
+# counter1 = Counter(y_test)
+# print(counter,counter1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print('df5 event rate')
+print((df5['LABEL'].value_counts()[1]*100)/df5.shape[0]) # event rate is 5
+print("----")
+print('y_train value counts')
+print(y_train['LABEL'].value_counts())
+print("----")
+print('y_train event rate')
+print((y_train['LABEL'].value_counts()[1]*100)/y_train.shape[0])
+print("----")
+print('y_test value counts')
+print(y_test['LABEL'].value_counts())
+print("----")
+print('y_test event rate')
+print((y_test['LABEL'].value_counts()[1]*100)/y_test.shape[0])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+###Smote
+import imblearn
+from imblearn.over_sampling import SMOTE
+from collections import Counter
+# from sklearn.datasets import make_classification
+
+from imblearn import under_sampling
+from imblearn import over_sampling
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
+X_train_array=np.array(X_train)
+y_train_array=np.array(y_train)
+
+X_test_array=np.array(X_test)
+y_test_array=np.array(y_test)
+
+# X = np.array(data.ix[:, data.columns != 'Class'])
+# y = np.array(data.ix[:, data.columns == 'Class'])
+# print('Shape of X: {}'.format(X.shape))
+# print('Shape of y: {}'.format(y.shape))
+print("Before OverSampling, counts of label '1': {}".format(sum(y_train_array==1)))
+print("Before OverSampling, counts of label '0': {} \n".format(sum(y_train_array==0)))
+
+sm = SMOTE(random_state=2)
+X_train_smote, y_train_smote = sm.fit_sample(X_train_array, y_train_array.ravel())
+
+print('After OverSampling, the shape of X_train_smote: {}'.format(X_train_smote.shape))
+print('After OverSampling, the shape of y_train_smote: {} \n'.format(y_train_smote.shape))
+
+print("After OverSampling, counts of label '1' -y_train_smote: {}".format(sum(y_train_smote==1)))
+print("After OverSampling, counts of label '0' -y_train_smote: {}".format(sum(y_train_smote==0)))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# converting x_train_smote from array to df
+X_train_smote_df=pd.DataFrame(X_train_smote,columns=list(X_train.columns))
+print('X_train_smote_df',X_train_smote_df.shape)
+y_train_smote_df=pd.DataFrame(y_train_smote,columns=list(y_train.columns))
+print('y_train_smote_df',y_train_smote_df.shape)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# # random oversampling and undersampling for imbalanced data
+# from collections import Counter
+# # from sklearn.datasets import make_classification
+# import imblearn
+# from imblearn import under_sampling
+# from imblearn import over_sampling
+# from imblearn.over_sampling import RandomOverSampler
+# from imblearn.under_sampling import RandomUnderSampler
+# # define dataset
+# # X, y = make_classification(n_samples=10000, weights=[0.99], flip_y=0)
+# # summarize class distribution
+# print(Counter(y_train))
+# # define oversampling strategy
+# over = RandomOverSampler(sampling_strategy=0.4)
+# # fit and apply the transform
+# X_train, y_train = over.fit_resample(X_train, y_train)
+# # summarize class distribution
+# print(Counter(y_train))
+# # define undersampling strategy
+# under = RandomUnderSampler(sampling_strategy=0.6)
+# # fit and apply the transform
+# X_train, y_train = under.fit_resample(X_train, y_train)
+# # summarize class distribution
+# print(Counter(y_train))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params = {'max_depth': [1,2,3,4,5,6], 'min_child_weight': [1,2,3,4]}    # parameters to be tries in the grid search
+# fix_params = {'learning_rate': 0.1, 'n_estimators': 100, 'objective': 'binary:logistic'}   #other parameters, fixed for the moment
+cv_params = {'max_depth': [6,10,15,20,22,25,30], 'min_child_weight': [2,3,5,6]}    # parameters to be tries in the grid search
+fix_params = {'verbos':2,'learning_rate': 0.2, 'n_estimators': 100, 'objective': 'binary:logistic'}   #other parameters, fixed for the moment
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.fit(X_train, y_train)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_ ## 20,5
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params = {'subsample': [0.4,0.5,0.6,0.7,0.8,0.9], 'max_delta_step': [0,1,2,4]}
+fix_params = {'early_stopping_rounds':50,'learning_rate': 0.2, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv.grid_scores_
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params = {'subsample': [0.85,0.9,0.95], 'max_delta_step': [0.5,1,1.5]}
+fix_params = {'early_stopping_rounds':50,'learning_rate': 0.2, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params = {'subsample': [0.4,0.5,0.6,0.7,0.95], 'max_delta_step': [1.5,2,2.5,3,4,5,6]}
+fix_params = {'early_stopping_rounds':50,'learning_rate': 0.2, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'learning_rate': [0.01,0.05, 0.1, 0.15, 0.2, 0.25, 0.3],'scale_pos_weight' : [13,14,15,16,17,18]}
+fix_params= { 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'learning_rate': [0.28, 0.3,0.32,0.35,0.4],'scale_pos_weight' : [1,5,10,12,13]}
+fix_params= {'n_jobs':-1, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'scale_pos_weight' : [0,0.5,1,1.5,2]}
+fix_params= {'verbose':1,'learning_rate': 0.3,'n_jobs':-1, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'scale_pos_weight' : [0.2,0.5,0.6]}
+fix_params= {'learning_rate': 0.3,'n_jobs':-1, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5,verbose=1)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'scale_pos_weight' : [0.1,0.2,0.3]}
+fix_params= {'learning_rate': 0.3,'n_jobs':-1, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5,verbose=2)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cv_params={'n_estimators': [100,200,500,1000,1200,1500]}
+fix_params= {'scale_pos_weight':0.3,'learning_rate': 0.3,  'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5,verbose=2,n_jobs=-1)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params={'n_estimators': [150,200,250,300,400],'learning_rate': [0.2,0.25,0.3}
+fix_params= {'n_estimators':200,'learning_rate':0.3,'scale_pos_weight':0.3,  'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+### BORUTA
+from boruta import BorutaPy
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
+X_train_b=X_train_smote
+y_train_b=y_train_smote
+###initialize Boruta
+# forest = xgb.XGBClassifier(learning_rate=0.3,scale_pos_weight=0.3,  objective= 'binary:logistic', max_depth= 20, min_child_weight=5,subsample=0.95 , max_delta_step=1.5)
+# boruta = BorutaPy(
+#    estimator = forest,
+#    n_estimators = 'auto',
+#    max_iter = 100 # number of trials to perform
+# )
+
+rfc = RandomForestClassifier(n_estimators=200, n_jobs=-1, class_weight='balanced')#, max_depth=20)
+boruta_selector = BorutaPy(rfc, n_estimators='auto', verbose=2)
+# start_time = timer(None)
+boruta_selector.fit(X_train_b, y_train_b)
+
+### fit Boruta (it accepts np.array, not pd.DataFrame)
+# boruta.fit(np.array(X_train), np.array(y_train))
+# ### print results
+# green_area = X.columns[boruta.support_].to_list()
+# blue_area = X.columns[boruta.support_weak_].to_list()
+# print('features in the green area:', green_area)
+# print('features in the blue area:', blue_area)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(X_train_b.shape)
+print ('n Initial features: ', X_train_smote_df.columns.tolist() )
+
+# number of selected features
+print ('\n Number of selected features:')
+print (boruta_selector.n_features_)
+
+feature_df = pd.DataFrame(X_train_smote_df.columns.tolist(), columns=['features'])
+feature_df['rank']=boruta_selector.ranking_
+feature_df = feature_df.sort_values('rank', ascending=True).reset_index(drop=True)
+print ('\n Top %d features:' % boruta_selector.n_features_)
+print (feature_df.head(boruta_selector.n_features_))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# display important features with boruta
+selected_features = [X_train_smote_df.columns[i] for i, x in enumerate(boruta_selector.support_) if x]
+print(selected_features)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#boruta.support_ are the ones that at some point ended up in the acceptance area, thus you should include them in your model. The features stored in boruta.support_weak_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# making dataframe from the columns selected by boruta
+X_train_boruta=X_train_smote_df.loc[:,['MSINCEREGISTRNETWORK', 'R1_NALLDOUM0', 'R2_NALLDOUM0', 'R3_NALLDOUM0', 'ABONGAM0', 'ABONGAM1', 'ABONGAM2', 'NETUBLACKLISTM0', 'NETUBLACKLISTM1', 'NETUBLACKLISTM2', 'R1_NETURECHARGEM0', 'R2_NETURECHARGEM0', 'R3_NETURECHARGEM0', 'GSMA_CLASS_HANDHELD', 'GSMA_CLASS_MOBILE_FEATURE', 'GSMA_CLASS_SMARTPHONE', 'MARKET_SEGMENT_DP', 'MARKET_SEGMENT_HUSTLER', 'MARKET_SEGMENT_MASS', 'MARKET_SEGMENT_UNCLASS', 'MARKET_SEGMENT_YOUTH', 'R1_NMPESADOUM0', 'R2_NMPESADOUM0', 'R3_NMPESADOUM0', 'R1_AOTHERGROSSREVENUEM0', 'R2_AOTHERGROSSREVENUEM0', 'R3_AOTHERGROSSREVENUEM0', 'R1_NOTHERDOUM0', 'R2_NOTHERDOUM0', 'R3_NOTHERDOUM0', 'R1_NGSMDOUM0', 'R2_NGSMDOUM0', 'R3_NGSMDOUM0', 'R1_ACALLSALLREVENUEM0', 'R2_ACALLSALLREVENUEM0', 'R3_ACALLSALLREVENUEM0', 'R1_NCALLSALLMINUTESM0', 'R2_NCALLSALLMINUTESM0', 'R3_NCALLSALLMINUTESM0', 'R1_NCALLSDOUM0', 'R2_NCALLSDOUM0', 'R3_NCALLSDOUM0', 'R1_ASMSREVENUEM0', 'R2_ASMSREVENUEM0', 'R3_ASMSREVENUEM0', 'R1_NSMSQTYM0', 'R2_NSMSQTYM0', 'R3_NSMSQTYM0', 'R1_NSMSDOUM0', 'R2_NSMSDOUM0', 'R3_NSMSDOUM0', 'R1_AINP2PMPESAM0', 'R2_AINP2PMPESAM0', 'R3_AINP2PMPESAM0', 'R1_AINMPESAM0', 'R2_AINMPESAM0', 'R3_AINMPESAM0']]
+y_train_boruta=y_train_smote_df
+print(X_train_boruta.shape)
+print(y_train_boruta.shape)
+
+X_test_boruta=X_test.loc[:,['MSINCEREGISTRNETWORK', 'R1_NALLDOUM0', 'R2_NALLDOUM0', 'R3_NALLDOUM0', 'ABONGAM0', 'ABONGAM1', 'ABONGAM2', 'NETUBLACKLISTM0', 'NETUBLACKLISTM1', 'NETUBLACKLISTM2', 'R1_NETURECHARGEM0', 'R2_NETURECHARGEM0', 'R3_NETURECHARGEM0', 'GSMA_CLASS_HANDHELD', 'GSMA_CLASS_MOBILE_FEATURE', 'GSMA_CLASS_SMARTPHONE', 'MARKET_SEGMENT_DP', 'MARKET_SEGMENT_HUSTLER', 'MARKET_SEGMENT_MASS', 'MARKET_SEGMENT_UNCLASS', 'MARKET_SEGMENT_YOUTH', 'R1_NMPESADOUM0', 'R2_NMPESADOUM0', 'R3_NMPESADOUM0', 'R1_AOTHERGROSSREVENUEM0', 'R2_AOTHERGROSSREVENUEM0', 'R3_AOTHERGROSSREVENUEM0', 'R1_NOTHERDOUM0', 'R2_NOTHERDOUM0', 'R3_NOTHERDOUM0', 'R1_NGSMDOUM0', 'R2_NGSMDOUM0', 'R3_NGSMDOUM0', 'R1_ACALLSALLREVENUEM0', 'R2_ACALLSALLREVENUEM0', 'R3_ACALLSALLREVENUEM0', 'R1_NCALLSALLMINUTESM0', 'R2_NCALLSALLMINUTESM0', 'R3_NCALLSALLMINUTESM0', 'R1_NCALLSDOUM0', 'R2_NCALLSDOUM0', 'R3_NCALLSDOUM0', 'R1_ASMSREVENUEM0', 'R2_ASMSREVENUEM0', 'R3_ASMSREVENUEM0', 'R1_NSMSQTYM0', 'R2_NSMSQTYM0', 'R3_NSMSQTYM0', 'R1_NSMSDOUM0', 'R2_NSMSDOUM0', 'R3_NSMSDOUM0', 'R1_AINP2PMPESAM0', 'R2_AINP2PMPESAM0', 'R3_AINP2PMPESAM0', 'R1_AINMPESAM0', 'R2_AINMPESAM0', 'R3_AINMPESAM0']]
+y_test_boruta=y_test
+print(X_test_boruta.shape)
+print(y_test_boruta.shape)
+print('--------original test------')
+print(X_test.shape)
+print(y_test.LABEL.value_counts())
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(y_train_boruta['LABEL'].value_counts())
+print(y_test_boruta['LABEL'].value_counts())
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params={'n_estimators': [150,200,250,300,400],'learning_rate': [0.2,0.25,0.3}
+fix_params= {'n_estimators':200,'learning_rate':0.3,'scale_pos_weight':0.3,  'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#old
+fix_params = { 'learning_rate': 0.25, 'max_delta_step': 0, 'min_child_weight': 3, 'n_estimators': 100, 'subsample': 0.7, 'objective': 'binary:logistic', 'max_depth': 6}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#to be tried
+cv_params = {'learning_rate': [0.01,0.05,0.1,0.15,0.2,0.25,0.3],'n_estimators': [100,200,250,300,400,500],'max_depth':[3,5,6,10,15,20] }
+fix_params = {'early_stopping_rounds':50,  'objective': 'binary:logistic'}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, n_jobs=-1,verbose=2)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#to be tried
+cv_params = { 'alpha':[0,1,2,3], 'gamma':[0,1,2,3,4] }
+fix_params = {'learning_rate':0.3, 'max_depth':6,'n_estimators':300,'early_stopping_rounds':50,  'objective': 'binary:logistic'}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, n_jobs=-1,verbose=2)
+csv.fit(X_train_boruta, y_train_boruta)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(csv.best_score_)
+print(csv.best_params_)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+fix_params = {'alpha':0, 'gamma':3,'learning_rate': 0.3,'early_stopping_rounds':50,  'objective': 'binary:logistic', 'max_depth': 6, 'n_estimators': 300}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# standardisation
+from sklearn.preprocessing import StandardScaler
+X_train_boruta_sd = StandardScaler().fit_transform(X_train_boruta)
+X_test_boruta_sd = StandardScaler().fit_transform(X_test_boruta)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+# import scipy
+logit = sm.Logit(y_train, X_train)
+
+
+# But when I try to run the regression it always fails by different reasons
+# result = logit.fit()
+# numpy.linalg.linalg.LinAlgError: Singular matrix
+# Though, print(np.linalg.matrix_rank(df.values, tol=0.1)) returns max range
+result = logit.fit(method='bfgs')
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result.summary()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+xgdmat_train = xgb.DMatrix(X_train_boruta, y_train_boruta)
+xgdmat_test = xgb.DMatrix(X_test_boruta, y_test_boruta)
+xgb_final = xgb.train(fix_params, xgdmat_train, num_boost_round = 100)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# y_pred = xgb_final.predict(xgdmat_train)
+y_pred = xgb_final.predict(xgdmat_test)
+
+# cm = confusion_matrix(y_test, y_pred)
+# plot_confusion_matrix(cm, ['0', '1'], )
+# pr, tpr, fpr = show_data(cm, print_res = 1);
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_train_boruta.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# calculate roc curves
+from numpy import argmax
+# precision, recall, thresholds = precision_recall_curve(y_train_boruta, y_pred)
+precision, recall, thresholds = precision_recall_curve(y_test, y_pred)
+# convert to f score
+fscore = (2 * precision * recall) / (precision + recall)
+# locate the index of the largest f score
+ix = argmax(fscore)
+print('Best Threshold=%f, F-Score=%.3f' % (thresholds[ix], fscore[ix]))
+# plot the roc curve for the model
+no_skill = len(y_test[y_test==1]) / len(y_test)
+pyplot.plot([0,1], [no_skill,no_skill], linestyle='--', label='No Skill')
+pyplot.plot(recall, precision, marker='.', label='Logistic')
+pyplot.scatter(recall[ix], precision[ix], marker='o', color='black', label='Best')
+# axis labels
+pyplot.xlabel('Recall')
+pyplot.ylabel('Precision')
+pyplot.legend()
+# show the plot
+pyplot.show()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#boruta
+from sklearn.metrics import classification_report,confusion_matrix
+y_pred = xgb_final.predict(xgdmat_test)
+thresh = 0.15
+y_pred [y_pred > thresh] = 1
+y_pred [y_pred <= thresh] = 0
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test['y_pred_prob']=y_pred
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.reset_index(drop=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.iloc[0:int((y_test.shape[0])/2),:].shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+aa=y_test.sort_values('y_pred_prob',ascending=False)
+aa.head()
+print('taking top 5 decile (50%)')
+bb=y_test.iloc[0:int((aa.shape[0])/2),:]
+print(bb.shape)
+print(bb.columns)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+thresh=0
+bb['y_pred_class'] = [1 if x>thresh else 0 for x in bb['y_pred_prob']]
+# bb.y_pred_class=(bb.y_pred_prob > thresh = 1)
+# bb.y_pred_class=bb.y_pred_prob <= thresh = 0
+print(confusion_matrix(bb['LABEL'],bb['y_pred_class']))
+print(classification_report(bb['LABEL'],bb['y_pred_class']))
+# bb.head(20)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+list(y_pred)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+# csv.fit(X_train, y_train)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# fix_params['learning_rate'] = 0.25
+params_final =  fix_params
+# print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+## new
+print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+## old
+print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# grid search for weight - scale_pos_weight= minority count/majority count --- 15,16,17,18
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+xgdmat_train = xgb.DMatrix(X_train, y_train)
+xgdmat_test = xgb.DMatrix(X_test, y_test)
+xgb_final = xgb.train(params_final, xgdmat_train, num_boost_round = 100)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+a=xgb_final.get_fscore
+print (a)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#new
+from sklearn.metrics import classification_report,confusion_matrix
+y_pred = xgb_final.predict(xgdmat_test)
+thresh = 0.06
+y_pred [y_pred > thresh] = 1
+y_pred [y_pred <= thresh] = 0
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#old
+# from sklearn.metrics import classification_report,confusion_matrix
+y_pred = xgb_final.predict(xgdmat_test)
+thresh = 0.7
+y_pred [y_pred > thresh] = 1
+y_pred [y_pred <= thresh] = 0
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
+
+***********************************************************************************************************************************************8
+***********************************************************************************************************************************************8
+
+#########################################xgb-training , important parameter selection, boruta, finding optimum threshold graphically************
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# -*- coding: utf-8 -*-
+import dataiku
+import pandas as pd, numpy as np
+from dataiku import pandasutils as pdu
+
+# Read recipe inputs
+up_data_cleaning = dataiku.Dataset("up_data_cleaning")
+up_data_cleaning_df = up_data_cleaning.get_dataframe()
+
+
+# Compute recipe outputs from inputs
+# TODO: Replace this part by your actual code that computes the output, as a Pandas dataframe
+# NB: DSS also supports other kinds of APIs for reading and writing data. Please see doc.
+
+mm_dev1_df = up_data_cleaning_df # For this sample code, simply copy input to output
+
+
+# Write recipe outputs
+#mm_dev1 = dataiku.Dataset("mm_dev1")
+#mm_dev1.write_with_schema(mm_dev1_df)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df1=mm_dev1_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from IPython.display import display
+
+from sklearn.metrics import confusion_matrix, f1_score, precision_recall_curve
+from sklearn.model_selection import GridSearchCV, train_test_split,cross_val_score
+
+import xgboost as xgb
+#import lightgbm as lgb
+
+import warnings
+warnings.filterwarnings("ignore")
+
+from collections import Counter
+import itertools
+from sklearn.preprocessing import LabelBinarizer
+import boruta
+import shapely
+# Set all options
+%matplotlib inline
+plt.style.use('seaborn-notebook')
+plt.rcParams["figure.figsize"] = (20, 3)
+pd.options.display.float_format = '{:20,.4f}'.format
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+sns.set(context="paper", font="monospace")
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+lb = LabelBinarizer()
+df1['LABEL'] = lb.fit_transform(df1['LABEL'].values)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# removed 6,9,12,24 months
+cols=list(["AALLGROSSREVENUEM0","AALLGROSSREVENUEM1","AALLGROSSREVENUEM2",
+"AAVGBALANCEMPESAL1M","AAVGBALANCEMPESAL2M","AAVGBALANCEMPESAL3M",
+"AAVGBALANCEMPESAM1","AAVGBALANCEMPESAM2","AAVGBALANCEMPESAM3",
+"AAVGINMPESAL3M",
+"AAVGINSENDMONEYMPESAL3M",
+"AAVGOUTMPESAL3M",
+"ABALANCEMPESAL1M","ABALANCEMPESAL2M","ABALANCEMPESAL3M",
+"ABALANCEMPESAM1","ABALANCEMPESAM2","ABALANCEMPESAM3",
+"ACALLSALLREVENUEM0","ACALLSALLREVENUEM1","ACALLSALLREVENUEM2",
+"ACASHINOUTMPESAL1M","ACASHINOUTMPESAL2M","ACASHINOUTMPESAL3M","ACASHINOUTMPESAM1","ACASHINOUTMPESAM2","ACASHINOUTMPESAM3",
+"ACHARGEDMPESAL1M","ACHARGEDMPESAL2M","ACHARGEDMPESAL3M","ACHARGEDMPESAM1","ACHARGEDMPESAM2","ACHARGEDMPESAM3",
+"ADATACOSTM0","ADATACOSTM1","ADATACOSTM2",
+"AGSMGROSSREVENUEM0","AGSMGROSSREVENUEM1","AGSMGROSSREVENUEM2",
+"AINMPESAL3M",
+"AINSENDMONEYMPESAL3M",
+"AMAXINMPESAL3M",
+"AMAXINSENDMONEYMPESAL3M",
+"AMAXOUTMPESAL3M",
+"AMININMPESAL3M",
+"AMININSENDMONEYMPESAL3M",
+"AOTHERGROSSREVENUEM0","AOTHERGROSSREVENUEM1","AOTHERGROSSREVENUEM2",
+"AOUTMPESAL3M",
+"CD_MPSA_ENTY",
+#"DOCID",
+"LABEL",
+"NALLDOUM0","NALLDOUM1","NALLDOUM2",
+"NCALLSALLMINUTESM0","NCALLSALLMINUTESM1","NCALLSALLMINUTESM2",
+"NCALLSDOUM0","NCALLSDOUM1","NCALLSDOUM2",
+"NDATADOUM0","NDATADOUM1","NDATADOUM2",
+"NDATAMBSM0","NDATAMBSM1","NDATAMBSM2",
+"NDAYSLIQUIDONMPESAL1M","NDAYSLIQUIDONMPESAL2M","NDAYSLIQUIDONMPESAL3M","NDAYSLIQUIDONMPESAM1","NDAYSLIQUIDONMPESAM2","NDAYSLIQUIDONMPESAM3",
+"NETUBLACKLISTM0","NETUBLACKLISTM1","NETUBLACKLISTM2",
+"NGAMBLINGMPESAL1M","NGAMBLINGMPESAL2M","NGAMBLINGMPESAL3M",
+"NGAMBLINGMPESAM1","NGAMBLINGMPESAM2","NGAMBLINGMPESAM3",#"NGAMBLINGMPESAM6",
+"NGSMDOUM0","NGSMDOUM1","NGSMDOUM2",
+"NINAGENTDEPOSITMPESAL1M","NINAGENTDEPOSITMPESAL2M","NINAGENTDEPOSITMPESAL3M","NINAGENTDEPOSITMPESAM1","NINAGENTDEPOSITMPESAM2","NINAGENTDEPOSITMPESAM3",
+"NINB2CMPESAL1M","NINB2CMPESAL2M","NINB2CMPESAL3M",
+"NINB2CMPESAM1","NINB2CMPESAM2","NINB2CMPESAM3",
+"NINB2CORGSMPESAL1M","NINB2CORGSMPESAL2M","NINB2CORGSMPESAL3M",
+"NINB2CORGSMPESAM1","NINB2CORGSMPESAM2","NINB2CORGSMPESAM3",
+"NINFAILUREMPESAL1M","NINFAILUREMPESAL2M","NINFAILUREMPESAL3M",
+"NINFAILUREMPESAM1","NINFAILUREMPESAM2","NINFAILUREMPESAM3",
+"NINIMTMPESAL1M","NINIMTMPESAL2M","NINIMTMPESAL3M",
+"NINIMTMPESAM1","NINIMTMPESAM2","NINIMTMPESAM3",
+"NINIMTMPESL1M","NINIMTMPESL2M","NINIMTMPESL3M",
+"NINIMTMPESM1","NINIMTMPESM2","NINIMTMPESM3",
+"NINMPESAL1M","NINMPESAL2M","NINMPESAL3M",
+"NINMPESAM1","NINMPESAM2","NINMPESAM3",
+"NINORGPAYMENTTOCUSTOMERMPESAL1M","NINORGPAYMENTTOCUSTOMERMPESAL2M","NINORGPAYMENTTOCUSTOMERMPESAL3M","NINORGPAYMENTTOCUSTOMERMPESAM1","NINORGPAYMENTTOCUSTOMERMPESAM2","NINORGPAYMENTTOCUSTOMERMPESAM3",
+"NINORGPAYMENTTOCUSTOMERORGSMPESAL1M","NINORGPAYMENTTOCUSTOMERORGSMPESAL2M","NINORGPAYMENTTOCUSTOMERORGSMPESAL3M","NINORGPAYMENTTOCUSTOMERORGSMPESAM1","NINORGPAYMENTTOCUSTOMERORGSMPESAM2","NINORGPAYMENTTOCUSTOMERORGSMPESAM3",
+"NINSENDMONEYMPESAL1M","NINSENDMONEYMPESAL2M","NINSENDMONEYMPESAL3M",
+"NINSENDMONEYMPESAM1","NINSENDMONEYMPESAM2","NINSENDMONEYMPESAM3",
+"NMPESADOUM0","NMPESADOUM1","NMPESADOUM2",
+"NMSHWARIDECLLOANREQUESTSL1M","NMSHWARIDECLLOANREQUESTSL2M","NMSHWARIDECLLOANREQUESTSL3M","NMSHWARIDECLLOANREQUESTSM1","NMSHWARIDECLLOANREQUESTSM2","NMSHWARIDECLLOANREQUESTSM3",
+"NMSHWARIDEPOSITSAVINGSL1M","NMSHWARIDEPOSITSAVINGSL2M","NMSHWARIDEPOSITSAVINGSL3M","NMSHWARIDEPOSITSAVINGSM1","NMSHWARIDEPOSITSAVINGSM2","NMSHWARIDEPOSITSAVINGSM3",
+"NOTHERDOUM0","NOTHERDOUM1","NOTHERDOUM2",
+"NOUTAGENTWITHDRAWALMPESAL1M","NOUTAGENTWITHDRAWALMPESAL2M","NOUTAGENTWITHDRAWALMPESAL3M","NOUTAGENTWITHDRAWALMPESAM1","NOUTAGENTWITHDRAWALMPESAM2","NOUTAGENTWITHDRAWALMPESAM3",
+"NOUTAIRTIMEMPESAL1M","NOUTAIRTIMEMPESAL2M","NOUTAIRTIMEMPESAL3M","NOUTAIRTIMEMPESAM1","NOUTAIRTIMEMPESAM2","NOUTAIRTIMEMPESAM3",
+"NOUTFAILUREMPESAL1M","NOUTFAILUREMPESAL2M","NOUTFAILUREMPESAL3M","NOUTFAILUREMPESAM1","NOUTFAILUREMPESAM2","NOUTFAILUREMPESAM3",
+"NOUTIMTMPESAL1M","NOUTIMTMPESAL2M","NOUTIMTMPESAL3M","NOUTIMTMPESAM1","NOUTIMTMPESAM2","NOUTIMTMPESAM3",
+"NOUTLNMMPESAL1M","NOUTLNMMPESAL2M","NOUTLNMMPESAL3M","NOUTLNMMPESAM1","NOUTLNMMPESAM2","NOUTLNMMPESAM3",
+"NOUTLNMORGSMPESAL1M","NOUTLNMORGSMPESAL2M","NOUTLNMORGSMPESAL3M",
+"NOUTLNMORGSMPESAM1","NOUTLNMORGSMPESAM2","NOUTLNMORGSMPESAM3",
+"NOUTPAYBILLMPESAL1M","NOUTPAYBILLMPESAL2M","NOUTPAYBILLMPESAL3M","NOUTPAYBILLMPESAM1","NOUTPAYBILLMPESAM2","NOUTPAYBILLMPESAM3",
+"NOUTPAYBILLORGSMPESAL1M","NOUTPAYBILLORGSMPESAL2M","NOUTPAYBILLORGSMPESAL3M","NOUTPAYBILLORGSMPESAM1","NOUTPAYBILLORGSMPESAM2","NOUTPAYBILLORGSMPESAM3",
+"NOUTSENDMONEYMPESAL1M","NOUTSENDMONEYMPESAL2M","NOUTSENDMONEYMPESAL3M","NOUTSENDMONEYMPESAM1","NOUTSENDMONEYMPESAM2","NOUTSENDMONEYMPESAM3",
+"NOUTTRANSACMPESAL1M","NOUTTRANSACMPESAL2M","NOUTTRANSACMPESAL3M",
+"NOUTTRANSACMPESAM1","NOUTTRANSACMPESAM2","NOUTTRANSACMPESAM3",
+"NOUTWITHDRAWALMPESAL1M","NOUTWITHDRAWALMPESAL2M","NOUTWITHDRAWALMPESAL3M",
+"NOUTWITHDRAWALMPESAM1","NOUTWITHDRAWALMPESAM2","NOUTWITHDRAWALMPESAM3",
+#"NR_SBSC",
+"NSMSDOUM0","NSMSDOUM1","NSMSDOUM2",
+"NUNIQUEGAMBLINGORGSMPESAL1M","NUNIQUEGAMBLINGORGSMPESAL2M","NUNIQUEGAMBLINGORGSMPESAL3M",
+"NUNIQUEGAMBLINGORGSMPESAM1","NUNIQUEGAMBLINGORGSMPESAM2","NUNIQUEGAMBLINGORGSMPESAM3",
+"NUTILITYMPESAL1M","NUTILITYMPESAL2M","NUTILITYMPESAL3M",
+"NUTILITYMPESAM1","NUTILITYMPESAM2","NUTILITYMPESAM3",
+])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df2=df1.loc[:,cols]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df2.shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5=df2.copy()
+X,y=df5.loc[:, df5.columns !='LABEL'] , df5.loc[:, ['LABEL']]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+from sklearn.preprocessing import StandardScaler
+X1=StandardScaler().fit_transform(X)
+X2=pd.DataFrame(X1,columns=X.columns)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+plt.figure(figsize=(6,3))
+sns.countplot(x='LABEL',data=df5)
+plt.show()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print('X shape',X.shape)
+print('y shape',y.shape)
+X_train, X_test, y_train, y_test =train_test_split(X2,y,test_size=0.3,random_state=11,stratify=y)
+print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
+# counter = Counter(y_train)
+# counter1 = Counter(y_test)
+# print(counter,counter1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print('df5 event rate')
+print((df5['LABEL'].value_counts()[1]*100)/df5.shape[0]) # event rate is 5
+print("----")
+print('y_train value counts')
+print(y_train['LABEL'].value_counts())
+print("----")
+print('y_train event rate')
+print((y_train['LABEL'].value_counts()[1]*100)/y_train.shape[0])
+print("----")
+print('y_test value counts')
+print(y_test['LABEL'].value_counts())
+print("----")
+print('y_test event rate')
+print((y_test['LABEL'].value_counts()[1]*100)/y_test.shape[0])
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5.fillna(df5.mean(), inplace=True)
+# df5.apply(lambda x: x.fillna(x.mean()),axis=0)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df5.isnull().sum()
+# for i in df5.columns:
+#     print(i,'-',len(df5[df5[i].isnull()]))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params = {'max_depth': [1,2,3,4,5,6], 'min_child_weight': [1,2,3,4]}    # parameters to be tries in the grid search
+# fix_params = {'learning_rate': 0.1, 'n_estimators': 100, 'objective': 'binary:logistic'}   #other parameters, fixed for the moment
+# cv_params = {'max_depth': [6,10,15,20,22,25], 'min_child_weight': [3,5,6]}    # parameters to be tries in the grid search
+# fix_params = {'learning_rate': 0.3, 'n_estimators': 100, 'objective': 'binary:logistic'}   #other parameters, fixed for the moment
+# csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, verbose=2, n_jobs=-1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv.fit(X_train, y_train)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# print(csv.best_params_)
+# print(csv.best_score_)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+cc=[cols for cols in X_train.columns if cols not in ["NINB2CMPESAL3M",
+"NUTILITYMPESAM3",
+"NUTILITYMPESAL2M",
+"NUTILITYMPESAM2",
+"NOUTLNMORGSMPESAL3M",
+"NMSHWARIDEPOSITSAVINGSL3M",
+"NOUTLNMMPESAL3M",
+"NOUTPAYBILLMPESAM1",
+"NINB2CMPESAM3",
+"NGAMBLINGMPESAM3",
+"NUTILITYMPESAM1",
+"NGAMBLINGMPESAL3M",
+"NOUTLNMMPESAM3",
+"NUTILITYMPESAL1M",
+"NINB2CORGSMPESAL3M",
+"NINB2CORGSMPESAM3",
+"NOUTLNMORGSMPESAL2M",
+"NINB2CMPESAL2M",
+"NINB2CMPESAM1",
+"NGAMBLINGMPESAM2",
+"NOUTLNMMPESAM2",
+"NINB2CMPESAM2",
+"NINB2CMPESAL1M",
+"NINB2CORGSMPESAM2",
+"NOUTLNMMPESAL1M",
+"NOUTLNMORGSMPESAM3",
+"NOUTLNMMPESAL2M",
+"NOUTLNMORGSMPESAM2",
+"NMSHWARIDEPOSITSAVIN,GSM3",
+"NOUTLNMMPESAM1",
+"NOUTLNMORGSMPESAL1M",
+"NGAMBLINGMPESAM1",
+"NGAMBLINGMPESAL2",
+"NMSHWARIDEPOSITSAVINGSL2M",
+"NINB2CORGSMPESAL1M",
+"NMSHWARIDEPOSITSAVINGSM1",
+"NMSHWARIDEPOSITSAVINGSL1M",
+"NINB2CORGSMPESAM1",
+"NOUTLNMORGSMPESAM1",
+"NINB2CORGSMPESAL2M",
+"NGAMBLINGMPESAL1M",
+"NMSHWARIDEPOSITSAVINGSM2",
+"NINIMTMPESAL3M",
+"NINIMTMPESL3M",
+"NINIMTMPESAL1",
+"NINIMTMPESAM2",
+"NINIMTMPESAL2M",
+"NINIMTMPESAM1",
+"NINIMTMPESL1M",
+"NINIMTMPESM2",
+"NINIMTMPESM3",
+"NINIMTMPESM1",
+ "NUNIQUEGAMBLINGORGSMPESAM3",
+"NUNIQUEGAMBLINGORGSMPESAL3M",
+"NUNIQUEGAMBLINGORGSMPESAM2",
+"NMSHWARIDEPOSITSAVINGSM3",
+"NGAMBLINGMPESAL2M",
+"NUNIQUEGAMBLINGORGSMPESAL1M",
+"NUNIQUEGAMBLINGORGSMPESAM1",
+"NINIMTMPESAL1M",
+"NINIMTMPESL2M",
+"NINIMTMPESAM3"
+"ABALANCEMPESAL2M",
+"NOUTAGENTWITHDRAWALMPESAM1",
+"NOUTPAYBILLMPESAM3",
+"NOUTPAYBILLORGSMPESAM3",
+"NOUTPAYBILLMPESAL1M",
+"NOUTPAYBILLORGSMPESAL2M",
+"ABALANCEMPESAL3M",
+"NOUTWITHDRAWALMPESAL1M",
+"NOUTWITHDRAWALMPESAM2",
+"NOUTPAYBILLORGSMPESAM1",
+"NOUTPAYBILLMPESAL2M",
+"NOUTWITHDRAWALMPESAM1",
+"NOUTPAYBILLORGSMPESAL1M",
+"NOUTPAYBILLORGSMPESAM2",
+"NOUTPAYBILLMPESAM2",
+"NUNIQUEGAMBLINGORGSMPESAL2M",
+"NMSHWARIDECLLOANREQUESTSL1M",
+ "ABALANCEMPESAM1",
+"ABALANCEMPESAL2M",
+"NINIMTMPESAM3",
+ #"NMSHWARIDECLLOANREQUESTSL2M",
+ "NINAGENTDEPOSITMPESAM1",
+ #"NMSHWARIDECLLOANREQUESTSL3M",
+    #"NINMPESAM2",
+    "NINAGENTDEPOSITMPESAL2M",
+    "NINMPESAL2M",
+    "NOUTTRANSACMPESAM1",
+      "NINMPESAL3M",
+    "NINAGENTDEPOSITMPESAM2",
+    "NOUTWITHDRAWALMPESAM3",
+    #NMPESADOUM1
+    "OUTWITHDRAWALMPESAL2M",
+    "NINMPESAL1M",
+   # "NOUTAGENTWITHDRAWALMPESAL2M",
+   # "NINMPESAM1",
+    "ABALANCEMPESAM2",
+    #NMPESADOUM0
+    "NINAGENTDEPOSITMPESAL1M",
+"NOUTTRANSACMPESAM2",
+"NOUTSENDMONEYMPESAM1",
+"NOUTAGENTWITHDRAWALMPESAM2",
+"NOUTWITHDRAWALMPESAL2M",
+#"NOUTAIRTIMEMPESAL1M",
+"ABALANCEMPESAL1M",
+"NOUTTRANSACMPESAL2M",
+#"NINMPESAM2",
+"NOUTWITHDRAWALMPESAL3M",
+#"NMPESADOUM1",
+#"NOUTAGENTWITHDRAWALMPESAL1M",
+#"NMPESADOUM0",
+#"NMPESADOUM2",
+     "NINSENDMONEYMPESAM1",
+    #"NOUTAIRTIMEMPESAM1",
+    "NINSENDMONEYMPESAL2M",
+    "NUTILITYMPESAL3M",
+    #"NCALLSDOUM1",
+    "NINAGENTDEPOSITMPESAM3",
+    #"NOUTAIRTIMEMPESAM2",
+    "NINMPESAM1",
+    "NINMPESAM2",
+    #"NGSMDOUM1",
+    "NMPESADOUM2",
+    "NMPESADOUM1",
+    "NMPESADOUM0",
+    "NMSHWARIDECLLOANREQUESTSL2M",
+"NOUTPAYBILLORGSMPESAL3M",
+#"NALLDOUM2",
+#"NGSMDOUM0",
+#"NCALLSDOUM2",
+#"NCALLSDOUM1",
+"ACHARGEDMPESAL2M",
+#"NALLDOUM1",
+"NOUTSENDMONEYMPESAL1M",
+#"NGSMDOUM2",
+"ABALANCEMPESAM3",
+#"NGSMDOUM1" ,
+                       "CD_MPSA_ENTY", "NDAYSLIQUIDONMPESAM3","NDAYSLIQUIDONMPESAM2","NDAYSLIQUIDONMPESAM1"   ,
+"NINMPESAM3",
+"NOUTAGENTWITHDRAWALMPESAM3","NOUTAGENTWITHDRAWALMPESAL3M", "NOUTAGENTWITHDRAWALMPESAL2M", "NOUTAGENTWITHDRAWALMPESAL1M",
+"NOUTSENDMONEYMPESAM2","NOUTSENDMONEYMPESAL2M","NOUTSENDMONEYMPESAL3M","NOUTSENDMONEYMPESAL1M",
+"NINSENDMONEYMPESAL1M","NINSENDMONEYMPESAL3M" , "NINSENDMONEYMPESAM2","NINSENDMONEYMPESAM1","NINSENDMONEYMPESAM3",
+#"NOUTAIRTIMEMPESAL2M","NOUTAIRTIMEMPESAL3M", "NOUTAIRTIMEMPESAL1M"
+"NOUTTRANSACMPESAM3","NOUTTRANSACMPESAL1M","NOUTTRANSACMPESAL3M","NOUTTRANSACMPESAL2M",
+"NOUTPAYBILLMPESAL3M","NOUTTRANSACMPESAM3" ,
+        "NINORGPAYMENTTOCUSTOMERMPESAL1M",
+        "NMSHWARIDECLLOANREQUESTSL3M",
+                            "NINORGPAYMENTTOCUSTOMERMPESAL2M",
+                            "NMSHWARIDECLLOANREQUESTSM1"  ,
+"NINORGPAYMENTTOCUSTOMERMPESAL1M"
+"NMSHWARIDECLLOANREQUESTSL3M",
+                              "NINORGPAYMENTTOCUSTOMERMPESAL1M",
+                            "NMSHWARIDECLLOANREQUESTSL3M",
+                            "NINORGPAYMENTTOCUSTOMERMPESAL3M",
+                            "NMSHWARIDECLLOANREQUESTSM2",
+  "NINORGPAYMENTTOCUSTOMERMPESAM1",
+"NMSHWARIDECLLOANREQUESTSM3",
+                                                    "NINORGPAYMENTTOCUSTOMERMPESAM2",
+                                                    "NOUTFAILUREMPESAL1M",
+                                    "NINORGPAYMENTTOCUSTOMERMPESAM3",
+                                    "NOUTFAILUREMPESAL2M",
+                                                    "NOUTFAILUREMPESAL3M",
+                                    "NOUTFAILUREMPESAM1",
+"NOUTFAILUREMPESAM2","NDAYSLIQUIDONMPESAL1M","NDAYSLIQUIDONMPESAL2M","NDAYSLIQUIDONMPESAL3M"  ,
+                                                    "NOUTFAILUREMPESAM3",
+                                                    "NOUTIMTMPESAL1M",
+                                                    "NOUTIMTMPESAL2M",
+                                              "NOUTIMTMPESAL3M",
+                                                    "NOUTIMTMPESAM1",
+                                        "NOUTIMTMPESAM2",
+                                                    "NOUTIMTMPESAM3"]]
+X_train1=X_train[cc]
+X_test1=X_test[cc]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params = {'subsample': [0.4,0.5,0.6,0.7], 'max_delta_step': [0,1,2,4]}
+# cv_params = {'learning_rate': [0.1,0.13,0.15,0.17,0.2,0.22,0.25,0.3]}
+# cv_params = {'learning_rate': [0.01,0.02,0.05,0.09,0.08,0.1,0.11]} -0.09
+fix_params = {'learning_rate':0.09,'early_stopping_rounds':50, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 22, 'min_child_weight':3}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, verbose=2, n_jobs=-1)
+# csv.fit(X_train1, y_train)
+# # # csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(X_train.shape)
+print(X_train1.shape)
+print(X_test.shape)
+print(X_test1.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# # csv.grid_scores_
+# print(csv.best_params_)
+# print(csv.best_score_)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+xgdmat_train = xgb.DMatrix(X_train1, y_train)
+xgdmat_test = xgb.DMatrix(X_test1, y_test)
+xgb_final = xgb.train(fix_params, xgdmat_train, num_boost_round = 100)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+xgb_final.get_score
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# y_pred = xgb_final.predict(xgdmat_train)
+y_pred = xgb_final.predict(xgdmat_test)
+
+# cm = confusion_matrix(y_test, y_pred)
+# plot_confusion_matrix(cm, ['0', '1'], )
+# pr, tpr, fpr = show_data(cm, print_res = 1);
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# calculate roc curves
+from numpy import argmax
+import matplotlib.pyplot as pyplot
+# precision, recall, thresholds = precision_recall_curve(y_train_boruta, y_pred)
+precision, recall, thresholds = precision_recall_curve(y_test, y_pred)
+# convert to f score
+fscore = (2 * precision * recall) / (precision + recall)
+# locate the index of the largest f score
+ix = argmax(fscore)
+print('Best Threshold=%f, F-Score=%.3f' % (thresholds[ix], fscore[ix]))
+# plot the roc curve for the model
+no_skill = len(y_test[y_test==1]) / len(y_test)
+pyplot.plot([0,1], [no_skill,no_skill], linestyle='--', label='No Skill')
+pyplot.plot(recall, precision, marker='.', label='Logistic')
+pyplot.scatter(recall[ix], precision[ix], marker='o', color='black', label='Best')
+# axis labels
+pyplot.xlabel('Recall')
+pyplot.ylabel('Precision')
+pyplot.legend()
+# show the plot
+pyplot.show()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# after feature selection based on xgboost-weight
+from sklearn.metrics import classification_report,confusion_matrix, roc_auc_score,roc_curve
+y_hat=y_pred.copy()
+# y_pred = xgb_final.predict(xgdmat_test)
+thresh=0.135      # 0.135-68/91 , optim-0.28
+# optimum -0.28 -75/84,  0.2-73/86, 0.15 -71/88, 0.1 -68/90, 0.09-68/90 ,0.08-67/91
+# thresh=0.08 # standardized, optim=0.231 -74/85 ,0.2 -73/86, 0.15 -71/87,  0.09- 68/90, 0.08 -67/91
+# thresh=0.08 # after removing  features (optimal -0.245 -79f1, 0.08-67/91)
+# thresh = 0.09 #0.09-- 68/91
+y_hat [y_hat > thresh] = 1
+y_hat [y_hat <= thresh] = 0
+print(confusion_matrix(y_test,y_hat))
+print(classification_report(y_test,y_hat))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import seaborn as sn
+sn.heatmap(confusion_matrix(y_test,y_hat), annot=True,  fmt='.2f', xticklabels = ["No", "Yes"] , yticklabels = ["No", "Yes"],)
+pyplot.ylabel('True label',fontsize=15)
+pyplot.xlabel('Predicted label',fontsize=15)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+pred_log=pd.DataFrame(y_hat)
+pred_log.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test1=y_test.reset_index()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+predictions=pd.concat([y_test1,pred_log,pd.DataFrame(y_pred)],axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+predictions.columns=['index','LABEL','predicted','prob_1']
+predictions['prob_0']=1-predictions['prob_1']
+predictions.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+auc_score = roc_auc_score( predictions.LABEL, predictions.prob_1 )
+round( float( auc_score ), 2 )
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+Python
+fpr, tpr, threshold = metrics.roc_curve(Y1_test,predictions.Survived_1,drop_intermediate=False)
+roc_auc = metrics.auc(fpr, tpr)
+
+plt.title('Receiver Operating Characteristic')
+plt.plot(fpr, tpr, 'b', label='ROC curve (area = %0.2f)' % auc_score)
+plt.legend(loc = 'lower right')
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0, 1])
+plt.ylim([0, 1])
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# get_score(fmap='', importance_type='weight')
+# Get feature importance of each feature. Importance type can be defined as:
+
+# ‘weight’: the number of times a feature is used to split the data across all trees.
+
+# ‘gain’: the average gain across all splits the feature is used in.
+
+# ‘cover’: the average coverage across all splits the feature is used in -the features are covering how much of the data in split
+
+# ‘total_gain’: the total gain across all splits the feature is used in - total and not average, average is the 'gain''
+
+# ‘total_cover’: the total coverage across all splits the feature is used in.  - total and not average, average is the 'cover'
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+### SHAP
+#### https://www.kaggle.com/wrosinski/shap-feature-importance-with-feature-engineering
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+aa=xgb_final.get_score(fmap='', importance_type='weight')
+df_weight=pd.DataFrame(list(aa.items()),columns=['columns','Weight']).sort_values(by='Weight',ascending=False)
+df_weight
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: MARKDOWN
+# ### LIFT, Gain
+# #### https://www.datavedas.com/model-evaluation-in-python/
+# #### https://intellipaat.com/community/15492/how-to-build-a-lift-chart-a-k-a-gains-chart-in-python
+# #### https://intellipaat.com/community/15492/how-to-build-a-lift-chart-a-k-a-gains-chart-in-python
+# #### https://github.com/reiinakano/scikit-plot/issues/74
+# #### https://github.com/reiinakano/scikit-plot/issues/74
+# #### https://www.analyticsvidhya.com/blog/2019/08/11-important-model-evaluation-error-metrics/
+# 
+# ###PCA
+# #### https://towardsdatascience.com/pca-using-python-scikit-learn-e653f8989e60
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+## NDATAMBSM2 missing values can be filled by NDATADOUM2
+df_3['NDATAMBSM2']=np.where((df_3['NDATAMBSM2'].isnull()) & (df_3['NDATADOUM2']<6),49,
+         np.where((df_3['NDATAMBSM2'].isnull()) & (df_3['NDATADOUM2']<13,295,
+                  np.where((df_3['NDATAMBSM2'].isnull()) & (df_3['NDATADOUM2']<19),688,
+                          np.where((df_3['NDATAMBSM2'].isnull()) & (df_3['NDATADOUM2']<25),1183,
+                                  np.where((df_3['NDATAMBSM2'].isnull()) & (df_3['NDATADOUM2']>25),3170,df_3['NDATAMBSM2'].mean())))))
+
+
+## NDATAMBSM1 missing values can be filled by NDATADOUM1
+df_3['NDATAMBSM1']=np.where((df_3['NDATAMBSM1'].isnull()) & (df_3['NDATADOUM1']<6),49,
+         np.where((df_3['NDATAMBSM1'].isnull()) & (df_3['NDATADOUM1']<13,295,
+                  np.where((df_3['NDATAMBSM1'].isnull()) & (df_3['NDATADOUM1']<19),688,
+                          np.where((df_3['NDATAMBSM1'].isnull()) & (df_3['NDATADOUM1']<25),1183,
+                                  np.where((df_3['NDATAMBSM1'].isnull()) & (df_3['NDATADOUM1']>25),3170,df_3['NDATAMBSM1'].mean())))))
+
+
+## NDATAMBSM0 missing values can be filled by NDATADOUM0
+df_3['NDATAMBSM0']=np.where((df_3['NDATAMBSM0'].isnull()) & (df_3['NDATADOUM0']<6),48,
+         np.where((df_3['NDATAMBSM0'].isnull()) & (df_3['NDATADOUM0']<13,321,
+                  np.where((df_3['NDATAMBSM0'].isnull()) & (df_3['NDATADOUM0']<19),695,
+                          np.where((df_3['NDATAMBSM0'].isnull()) & (df_3['NDATADOUM0']<25),1308,
+                                  np.where((df_3['NDATAMBSM0'].isnull()) & (df_3['NDATADOUM0']>25),3230,df_3['NDATAMBSM0'].mean())))))
+
+
+
+######################################################################################################################
+#AOTHERGROSSREVENUEM2,AOTHERGROSSREVENUEM1, AOTHERGROSSREVENUEMo --- NOTHERDOU
+df_3['AOTHERGROSSREVENUEM2']=np.where((df_3['AOTHERGROSSREVENUEM2'].isnull()) & (df_3['NOTHERDOUM2']<6),60,
+         np.where((df_3['AOTHERGROSSREVENUEM2'].isnull()) & (df_3['NOTHERDOUM2']<13,83,
+                  np.where((df_3['AOTHERGROSSREVENUEM2'].isnull()) & (df_3['NOTHERDOUM2']<19),111,
+                          np.where((df_3['AOTHERGROSSREVENUEM2'].isnull()) & (df_3['NOTHERDOUM2']<25),150,
+                                  np.where((df_3['AOTHERGROSSREVENUEM2'].isnull()) & (df_3['NOTHERDOUM2']>25),232,df_3['AOTHERGROSSREVENUEM2'].mean())))))
+
+
+df_3['AOTHERGROSSREVENUEM1']=np.where((df_3['AOTHERGROSSREVENUEM1'].isnull()) & (df_3['NOTHERDOUM1']<6),10,
+         np.where((df_3['AOTHERGROSSREVENUEM1'].isnull()) & (df_3['NOTHERDOUM1']<13,55,
+                  np.where((df_3['AOTHERGROSSREVENUEM1'].isnull()) & (df_3['NOTHERDOUM1']<19),91,
+                          np.where((df_3['AOTHERGROSSREVENUEM1'].isnull()) & (df_3['NOTHERDOUM1']<25),150,
+                                  np.where((df_3['AOTHERGROSSREVENUEM1'].isnull()) & (df_3['NOTHERDOUM1']>25),259,df_3['AOTHERGROSSREVENUEM1'].mean())))))
+
+
+df_3['AOTHERGROSSREVENUEM0']=np.where((df_3['AOTHERGROSSREVENUEM0'].isnull()) & (df_3['NOTHERDOUM0']<6),10,
+         np.where((df_3['AOTHERGROSSREVENUEM0'].isnull()) & (df_3['NOTHERDOUM0']<13,53,
+                  np.where((df_3['AOTHERGROSSREVENUEM0'].isnull()) & (df_3['NOTHERDOUM0']<19),95,
+                          np.where((df_3['AOTHERGROSSREVENUEM0'].isnull()) & (df_3['NOTHERDOUM0']<25),150,
+                                  np.where((df_3['AOTHERGROSSREVENUEM0'].isnull()) & (df_3['NOTHERDOUM0']>25),225,df_3['AOTHERGROSSREVENUEM0'].mean())))))
+
+
+######################################################################################################################
+
+## ADATACOSTM2 missing values can be filled by NDATADOUM2
+df_3['ADATACOSTM2']=np.where((df_3['ADATACOSTM2'].isnull()) & (df_3['NDATADOUM2']<6),12,
+         np.where((df_3['ADATACOSTM2'].isnull()) & (df_3['NDATADOUM2']<13,64,
+                  np.where((df_3['ADATACOSTM2'].isnull()) & (df_3['NDATADOUM2']<19),128,
+                          np.where((df_3['ADATACOSTM2'].isnull()) & (df_3['NDATADOUM2']<25),210,
+                                  np.where((df_3['ADATACOSTM2'].isnull()) & (df_3['NDATADOUM2']>25),526,df_3['ADATACOSTM2'].mean())))))
+
+## ADATACOSTM1 missing values can be filled by NDATADOUM1
+df_3['ADATACOSTM1']=np.where((df_3['ADATACOSTM1'].isnull()) & (df_3['NDATADOUM1']<6),12,
+         np.where((df_3['ADATACOSTM1'].isnull()) & (df_3['NDATADOUM1']<13,60,
+                  np.where((df_3['ADATACOSTM1'].isnull()) & (df_3['NDATADOUM1']<19),128,
+                          np.where((df_3['ADATACOSTM1'].isnull()) & (df_3['NDATADOUM1']<25),210,
+                                  np.where((df_3['ADATACOSTM1'].isnull()) & (df_3['NDATADOUM1']>25),506,df_3['ADATACOSTM1'].mean())))))
+
+## ADATACOSTM0 missing values can be filled by NDATADOUM0
+df_3['ADATACOSTM0']=np.where((df_3['ADATACOSTM0'].isnull()) & (df_3['NDATADOUM0']<6),12,
+         np.where((df_3['ADATACOSTM0'].isnull()) & (df_3['NDATADOUM0']<13,60,
+                  np.where((df_3['ADATACOSTM0'].isnull()) & (df_3['NDATADOUM0']<19),121,
+                          np.where((df_3['ADATACOSTM0'].isnull()) & (df_3['NDATADOUM0']<25),210,
+                                  np.where((df_3['ADATACOSTM0'].isnull()) & (df_3['NDATADOUM0']>25),495,df_3['ADATACOSTM0'].mean())))))
+
+######################################################################################################################
+
+# NCALLSALLMINUTESM2 - NCALLSDOUM2
+  df_3['NCALLSALLMINUTESM2']=np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<6),6,
+         np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<13,36,
+                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<19),71,
+                          np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<25),117,
+                                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']>25),325,df_3['NCALLSALLMINUTESM2'].mean())))))
+
+
+# NCALLSALLMINUTESM1 - NCALLSDOUM1
+  df_3['NCALLSALLMINUTESM2']=np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<6),6,
+         np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<13,35,
+                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<19),70,
+                          np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<25),115,
+                                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']>25),325,df_3['NCALLSALLMINUTESM2'].mean())))))
+
+
+# NCALLSALLMINUTESM0 - NCALLSDOUM0
+  df_3['NCALLSALLMINUTESM2']=np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<6),6,
+         np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<13,35,
+                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<19),70,
+                          np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']<25),122,
+                                  np.where((df_3['NCALLSALLMINUTESM2'].isnull()) & (df_3['NCALLSDOUM2']>25),325,df_3['NCALLSALLMINUTESM2'].mean())))))
+
+######################################################################################################################
+
+
+# ACALLSALLREVENUEM2 - NCALLSDOUM2
+  df_3['ACALLSALLREVENUEM2']=np.where((df_3['ACALLSALLREVENUEM2'].isnull()) & (df_3['NCALLSDOUM2']<6),13,
+         np.where((df_3['ACALLSALLREVENUEM2'].isnull()) & (df_3['NCALLSDOUM2']<13,77,
+                  np.where((df_3['ACALLSALLREVENUEM2'].isnull()) & (df_3['NCALLSDOUM2']<19),158,
+                          np.where((df_3['ACALLSALLREVENUEM2'].isnull()) & (df_3['NCALLSDOUM2']<25),269,
+                                  np.where((df_3['ACALLSALLREVENUEM2'].isnull()) & (df_3['NCALLSDOUM2']>25),829,df_3['ACALLSALLREVENUEM2'].mean())))))
+
+# ACALLSALLREVENUEM1 - NCALLSDOUM1
+  df_3['ACALLSALLREVENUEM1']=np.where((df_3['ACALLSALLREVENUEM1'].isnull()) & (df_3['NCALLSDOUM1']<6),13,
+         np.where((df_3['ACALLSALLREVENUEM1'].isnull()) & (df_3['NCALLSDOUM1']<13,77,
+                  np.where((df_3['ACALLSALLREVENUEM1'].isnull()) & (df_3['NCALLSDOUM1']<19),158,
+                          np.where((df_3['ACALLSALLREVENUEM1'].isnull()) & (df_3['NCALLSDOUM1']<25),269,
+                                  np.where((df_3['ACALLSALLREVENUEM1'].isnull()) & (df_3['NCALLSDOUM1']>25),829,df_3['ACALLSALLREVENUEM1'].mean())))))
+
+# ACALLSALLREVENUEM0 - NCALLSDOUM0
+  df_3['ACALLSALLREVENUEM0']=np.where((df_3['ACALLSALLREVENUEM0'].isnull()) & (df_3['NCALLSDOUM0']<6),11,
+         np.where((df_3['ACALLSALLREVENUEM0'].isnull()) & (df_3['NCALLSDOUM0']<13,75,
+                  np.where((df_3['ACALLSALLREVENUEM0'].isnull()) & (df_3['NCALLSDOUM0']<19),153,
+                          np.where((df_3['ACALLSALLREVENUEM0'].isnull()) & (df_3['NCALLSDOUM0']<25),281,
+                                  np.where((df_3['ACALLSALLREVENUEM0'].isnull()) & (df_3['NCALLSDOUM0']>25),818,df_3['ACALLSALLREVENUEM0'].mean())))))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+aa=xgb_final.get_score(fmap='', importance_type='gain')
+df_gain=pd.DataFrame(list(aa.items()),columns=['columns','gain']).sort_values(by='gain',ascending=False)
+df_gain
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_weight_gain=pd.merge(df_weight, df_gain, on='columns')
+df_weight_gain
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params = {'subsample': [0.85,0.9,0.95], 'max_delta_step': [0.5,1,1.5]}
+fix_params = {'subsample':0.7,'early_stopping_rounds':50,'learning_rate': 0.2, 'n_estimators': 100, 'objective': 'binary:logistic', 'max_depth': 22, 'min_child_weight':3}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+### BORUTA
+from boruta import BorutaPy
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
+X_train_b=X_train_smote
+y_train_b=y_train_smote
+###initialize Boruta
+# forest = xgb.XGBClassifier(learning_rate=0.3,scale_pos_weight=0.3,  objective= 'binary:logistic', max_depth= 20, min_child_weight=5,subsample=0.95 , max_delta_step=1.5)
+# boruta = BorutaPy(
+#    estimator = forest,
+#    n_estimators = 'auto',
+#    max_iter = 100 # number of trials to perform
+# )
+
+rfc = RandomForestClassifier(n_estimators=200, n_jobs=-1, class_weight='balanced')#, max_depth=20)
+boruta_selector = BorutaPy(rfc, n_estimators='auto', verbose=2)
+# start_time = timer(None)
+boruta_selector.fit(X_train_b, y_train_b)
+
+### fit Boruta (it accepts np.array, not pd.DataFrame)
+# boruta.fit(np.array(X_train), np.array(y_train))
+# ### print results
+# green_area = X.columns[boruta.support_].to_list()
+# blue_area = X.columns[boruta.support_weak_].to_list()
+# print('features in the green area:', green_area)
+# print('features in the blue area:', blue_area)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(X_train_b.shape)
+print ('n Initial features: ', X_train_smote_df.columns.tolist() )
+
+# number of selected features
+print ('\n Number of selected features:')
+print (boruta_selector.n_features_)
+
+feature_df = pd.DataFrame(X_train_smote_df.columns.tolist(), columns=['features'])
+feature_df['rank']=boruta_selector.ranking_
+feature_df = feature_df.sort_values('rank', ascending=True).reset_index(drop=True)
+print ('\n Top %d features:' % boruta_selector.n_features_)
+print (feature_df.head(boruta_selector.n_features_))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# display important features with boruta
+selected_features = [X_train_smote_df.columns[i] for i, x in enumerate(boruta_selector.support_) if x]
+print(selected_features)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#boruta.support_ are the ones that at some point ended up in the acceptance area, thus you should include them in your model. The features stored in boruta.support_weak_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# making dataframe from the columns selected by boruta
+X_train_boruta=X_train_smote_df.loc[:,['MSINCEREGISTRNETWORK', 'R1_NALLDOUM0', 'R2_NALLDOUM0', 'R3_NALLDOUM0', 'ABONGAM0', 'ABONGAM1', 'ABONGAM2', 'NETUBLACKLISTM0', 'NETUBLACKLISTM1', 'NETUBLACKLISTM2', 'R1_NETURECHARGEM0', 'R2_NETURECHARGEM0', 'R3_NETURECHARGEM0', 'GSMA_CLASS_HANDHELD', 'GSMA_CLASS_MOBILE_FEATURE', 'GSMA_CLASS_SMARTPHONE', 'MARKET_SEGMENT_DP', 'MARKET_SEGMENT_HUSTLER', 'MARKET_SEGMENT_MASS', 'MARKET_SEGMENT_UNCLASS', 'MARKET_SEGMENT_YOUTH', 'R1_NMPESADOUM0', 'R2_NMPESADOUM0', 'R3_NMPESADOUM0', 'R1_AOTHERGROSSREVENUEM0', 'R2_AOTHERGROSSREVENUEM0', 'R3_AOTHERGROSSREVENUEM0', 'R1_NOTHERDOUM0', 'R2_NOTHERDOUM0', 'R3_NOTHERDOUM0', 'R1_NGSMDOUM0', 'R2_NGSMDOUM0', 'R3_NGSMDOUM0', 'R1_ACALLSALLREVENUEM0', 'R2_ACALLSALLREVENUEM0', 'R3_ACALLSALLREVENUEM0', 'R1_NCALLSALLMINUTESM0', 'R2_NCALLSALLMINUTESM0', 'R3_NCALLSALLMINUTESM0', 'R1_NCALLSDOUM0', 'R2_NCALLSDOUM0', 'R3_NCALLSDOUM0', 'R1_ASMSREVENUEM0', 'R2_ASMSREVENUEM0', 'R3_ASMSREVENUEM0', 'R1_NSMSQTYM0', 'R2_NSMSQTYM0', 'R3_NSMSQTYM0', 'R1_NSMSDOUM0', 'R2_NSMSDOUM0', 'R3_NSMSDOUM0', 'R1_AINP2PMPESAM0', 'R2_AINP2PMPESAM0', 'R3_AINP2PMPESAM0', 'R1_AINMPESAM0', 'R2_AINMPESAM0', 'R3_AINMPESAM0']]
+y_train_boruta=y_train_smote_df
+print(X_train_boruta.shape)
+print(y_train_boruta.shape)
+
+X_test_boruta=X_test.loc[:,['MSINCEREGISTRNETWORK', 'R1_NALLDOUM0', 'R2_NALLDOUM0', 'R3_NALLDOUM0', 'ABONGAM0', 'ABONGAM1', 'ABONGAM2', 'NETUBLACKLISTM0', 'NETUBLACKLISTM1', 'NETUBLACKLISTM2', 'R1_NETURECHARGEM0', 'R2_NETURECHARGEM0', 'R3_NETURECHARGEM0', 'GSMA_CLASS_HANDHELD', 'GSMA_CLASS_MOBILE_FEATURE', 'GSMA_CLASS_SMARTPHONE', 'MARKET_SEGMENT_DP', 'MARKET_SEGMENT_HUSTLER', 'MARKET_SEGMENT_MASS', 'MARKET_SEGMENT_UNCLASS', 'MARKET_SEGMENT_YOUTH', 'R1_NMPESADOUM0', 'R2_NMPESADOUM0', 'R3_NMPESADOUM0', 'R1_AOTHERGROSSREVENUEM0', 'R2_AOTHERGROSSREVENUEM0', 'R3_AOTHERGROSSREVENUEM0', 'R1_NOTHERDOUM0', 'R2_NOTHERDOUM0', 'R3_NOTHERDOUM0', 'R1_NGSMDOUM0', 'R2_NGSMDOUM0', 'R3_NGSMDOUM0', 'R1_ACALLSALLREVENUEM0', 'R2_ACALLSALLREVENUEM0', 'R3_ACALLSALLREVENUEM0', 'R1_NCALLSALLMINUTESM0', 'R2_NCALLSALLMINUTESM0', 'R3_NCALLSALLMINUTESM0', 'R1_NCALLSDOUM0', 'R2_NCALLSDOUM0', 'R3_NCALLSDOUM0', 'R1_ASMSREVENUEM0', 'R2_ASMSREVENUEM0', 'R3_ASMSREVENUEM0', 'R1_NSMSQTYM0', 'R2_NSMSQTYM0', 'R3_NSMSQTYM0', 'R1_NSMSDOUM0', 'R2_NSMSDOUM0', 'R3_NSMSDOUM0', 'R1_AINP2PMPESAM0', 'R2_AINP2PMPESAM0', 'R3_AINP2PMPESAM0', 'R1_AINMPESAM0', 'R2_AINMPESAM0', 'R3_AINMPESAM0']]
+y_test_boruta=y_test
+print(X_test_boruta.shape)
+print(y_test_boruta.shape)
+print('--------original test------')
+print(X_test.shape)
+print(y_test.LABEL.value_counts())
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(y_train_boruta['LABEL'].value_counts())
+print(y_test_boruta['LABEL'].value_counts())
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# cv_params={'n_estimators': [150,200,250,300,400],'learning_rate': [0.2,0.25,0.3}
+fix_params= {'n_estimators':200,'learning_rate':0.3,'scale_pos_weight':0.3,  'objective': 'binary:logistic', 'max_depth': 20, 'min_child_weight':5,'subsample':0.95 , 'max_delta_step':1.5 }
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#old
+fix_params = { 'learning_rate': 0.25, 'max_delta_step': 0, 'min_child_weight': 3, 'n_estimators': 100, 'subsample': 0.7, 'objective': 'binary:logistic', 'max_depth': 6}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#to be tried
+cv_params = {'learning_rate': [0.01,0.05,0.1,0.15,0.2,0.25,0.3],'n_estimators': [100,200,250,300,400,500],'max_depth':[3,5,6,10,15,20] }
+fix_params = {'early_stopping_rounds':50,  'objective': 'binary:logistic'}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, n_jobs=-1,verbose=2)
+csv.fit(X_train, y_train)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#to be tried
+cv_params = { 'alpha':[0,1,2,3], 'gamma':[0,1,2,3,4] }
+fix_params = {'learning_rate':0.3, 'max_depth':6,'n_estimators':300,'early_stopping_rounds':50,  'objective': 'binary:logistic'}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5, n_jobs=-1,verbose=2)
+csv.fit(X_train_boruta, y_train_boruta)
+# csv.grid_scores_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print(csv.best_score_)
+print(csv.best_params_)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+fix_params = {'alpha':0, 'gamma':3,'learning_rate': 0.3,'early_stopping_rounds':50,  'objective': 'binary:logistic', 'max_depth': 6, 'n_estimators': 300}
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# standardisation
+from sklearn.preprocessing import StandardScaler
+X_train_boruta_sd = StandardScaler().fit_transform(X_train_boruta)
+X_test_boruta_sd = StandardScaler().fit_transform(X_test_boruta)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+# import scipy
+logit = sm.Logit(y_train, X_train)
+
+
+# But when I try to run the regression it always fails by different reasons
+# result = logit.fit()
+# numpy.linalg.linalg.LinAlgError: Singular matrix
+# Though, print(np.linalg.matrix_rank(df.values, tol=0.1)) returns max range
+result = logit.fit(method='bfgs')
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+result.summary()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test['y_pred_prob']=y_pred
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.reset_index(drop=True)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.iloc[0:int((y_test.shape[0])/2),:].shape
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+aa=y_test.sort_values('y_pred_prob',ascending=False)
+aa.head()
+print('taking top 5 decile (50%)')
+bb=y_test.iloc[0:int((aa.shape[0])/2),:]
+print(bb.shape)
+print(bb.columns)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+thresh=0
+bb['y_pred_class'] = [1 if x>thresh else 0 for x in bb['y_pred_prob']]
+# bb.y_pred_class=(bb.y_pred_prob > thresh = 1)
+# bb.y_pred_class=bb.y_pred_prob <= thresh = 0
+print(confusion_matrix(bb['LABEL'],bb['y_pred_class']))
+print(classification_report(bb['LABEL'],bb['y_pred_class']))
+# bb.head(20)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_test.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+list(y_pred)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv = GridSearchCV(xgb.XGBClassifier(**fix_params), cv_params, scoring = 'f1', cv = 5)
+# csv.fit(X_train, y_train)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# csv.best_params_
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# fix_params['learning_rate'] = 0.25
+params_final =  fix_params
+# print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+## new
+print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+## old
+print(params_final)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# grid search for weight - scale_pos_weight= minority count/majority count --- 15,16,17,18
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+xgdmat_train = xgb.DMatrix(X_train, y_train)
+xgdmat_test = xgb.DMatrix(X_test, y_test)
+xgb_final = xgb.train(params_final, xgdmat_train, num_boost_round = 100)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+a=xgb_final.get_fscore
+print (a)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#new
+from sklearn.metrics import classification_report,confusion_matrix
+y_pred = xgb_final.predict(xgdmat_test)
+thresh = 0.06
+y_pred [y_pred > thresh] = 1
+y_pred [y_pred <= thresh] = 0
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+#old
+# from sklearn.metrics import classification_report,confusion_matrix
+y_pred = xgb_final.predict(xgdmat_test)
+thresh = 0.7
+y_pred [y_pred > thresh] = 1
+y_pred [y_pred <= thresh] = 0
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
+****************************88****************************88****************************88****************************
+****************************88****************************88****************************88****************************
+
+######################################## pickeled model calling, predicting, lift and gain chart ###################################
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+import pickle
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/lgb.pkl','rb') as f:
+     cl1  = pickle.load(f)
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/rfc.pkl','rb') as f:
+     cl2  = pickle.load(f)
+with open('/data/dataiku/data/jupyter-run/dku-workdirs/VOICEINACTIVITY/xgb.pkl','rb') as f:
+     cl3  = pickle.load(f)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+
+import pandas as pd
+
+
+import numpy as np
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from IPython.display import display
+
+from sklearn.metrics import confusion_matrix, f1_score, precision_recall_curve
+from sklearn.model_selection import GridSearchCV, train_test_split,cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import classification_report
+
+
+import xgboost as xgb
+import lightgbm as lgb
+
+import warnings
+warnings.filterwarnings("ignore")
+
+from collections import Counter
+import itertools
+from sklearn.preprocessing import LabelBinarizer
+import boruta
+import shapely
+# Set all options
+#%matplotlib inline
+plt.style.use('seaborn-notebook')
+plt.rcParams["figure.figsize"] = (20, 3)
+pd.options.display.float_format = '{:20,.4f}'.format
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+sns.set(context="paper", font="monospace")
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# older list with rfc_cols
+
+model_cols=list([
+# target feature
+"INACTIVITY_LABEL",
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df_t = mydataset_df_test
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+round(mydataset_df_test.INACTIVITY_LABEL.sum()/mydataset_df_test.INACTIVITY_LABEL.count(),3)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df= df_t
+df = df.loc[:,model_cols]
+df.shape
+df = df.drop_duplicates()
+# df = df.drop(['NR_SBSC'], axis=1)
+df_model = df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_test = df_model.drop(['INACTIVITY_LABEL',"NR_SBSC"], axis=1)
+y_test_1 = df_model[['INACTIVITY_LABEL']]
+X_test_MSISDN = df_model[['NR_SBSC']]
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = X_test
+
+df['DAYS_ACTIVE_MORETHAN30_ALL'] = np.where((df['NALLDOUM0']+df['NALLDOUM1']+df['NALLDOUM2'])>30, 1, 0)
+
+# df = df.drop(["AOUTMPESAL3M","AINMPESAL3M""AMAXINSENDMONEYMPESAL3M","AINSENDMONEYMPESAL3M","AMAXOUTMPESAL3M","AMININMPESAL3M","AMAXINMPESAL3M","AMININSENDMONEYMPESAL3M"],axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+df = df.fillna(0)
+df = df.replace(np.inf, 0)
+# df = df.clip(df.quantile(0.0005), df.quantile(0.9995),axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+X_test_model_1 = df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+y_pred_rfc = cl2.predict(X_test_model_1)
+y_pred_xgb = cl3.predict(X_test_model_1)
+y_pred_lgb = cl1.predict(X_test_model_1)
+
+
+rfc = cl2
+mdl = cl1
+classifier_xgb = cl3
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+print('with a lower threshold of 0.4 (RFC)')
+threshold = 0.4
+predicted_proba_r = rfc.predict_proba(X_test_model_1)
+
+y_pred_rfc_2 = (predicted_proba_r [:,1] >= threshold).astype('int')
+print(classification_report(y_test_1,y_pred_rfc_2))
+
+print('with a lower threshold of 0.3 (LGB)')
+threshold = 0.3
+predicted_proba_l = mdl.predict_proba(X_test_model_1)
+
+y_pred_lgb_2 = (predicted_proba_l [:,1] >= threshold).astype('int')
+print(classification_report(y_test_1, y_pred_lgb_2))
+
+print('with a lower threshold of 0.3 (XGB)')
+threshold = 0.3
+predicted_proba_x = classifier_xgb.predict_proba(X_test_model_1)
+
+y_pred_xgb_2 = (predicted_proba_x [:,1] >= threshold).astype('int')
+print(classification_report(y_test_1, y_pred_xgb_2))#, target_names=target_names))
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# y_pred_2[0:1]
+# y_test_model.head(1)
+pred_proba_rfc = pd.DataFrame(predicted_proba_r)
+y_test_rfc = y_test_1.reset_index()
+y_test_rfc_label = y_test_rfc['INACTIVITY_LABEL']
+y_test_rfc_label.head(1)
+
+
+# taking y_pred - predicted probabilities and y_hat -1,0
+y_pred_df=pd.DataFrame(pred_proba_rfc[1]) ### predicted probs
+y_hat_df=pd.DataFrame(y_pred_rfc_2)### 1,0
+
+#combining y_pred_df and y_hat_df and y_test
+predictions=pd.concat([y_test_rfc_label,y_hat_df,y_pred_df],axis=1)
+predictions.columns=['LABEL','LABEL_PRED','PREDICTED_1_PROB']
+predictions['PREDICTED_0_PROB']=1-predictions['PREDICTED_1_PROB']
+predictions['DECILE'] = pd.qcut(predictions['PREDICTED_1_PROB'],10,labels=['1','2','3','4','5','6','7','8','9','10'])
+predictions['LABEL_0']=1-predictions['LABEL']
+
+#creating Pivot table
+pivot_df= pd.pivot_table(data=predictions,index=['DECILE'],values=['LABEL','LABEL_0','PREDICTED_1_PROB'],
+                     aggfunc={'LABEL':[np.sum],
+                              'LABEL_0':[np.sum],
+                              'PREDICTED_1_PROB' : [np.min,np.max]})
+
+##### We now calculate the defaulters and non-defaulters rate per decile.
+
+
+pivot_df.columns = ['Defaulter_Count','Non-Defaulter_Count','max_score','min_score']
+pivot_df['Total_Cust'] = pivot_df['Defaulter_Count']+pivot_df['Non-Defaulter_Count']
+
+pivot_df = pivot_df.sort_values(by='min_score',ascending=False)
+
+pivot_df['Default_Rate'] = (pivot_df['Defaulter_Count'] / pivot_df['Total_Cust']).apply('{0:.2%}'.format)
+default_sum = pivot_df['Defaulter_Count'].sum()
+non_default_sum = pivot_df['Non-Defaulter_Count'].sum()
+pivot_df['Default %'] = (pivot_df['Defaulter_Count']/default_sum).apply('{0:.2%}'.format)
+pivot_df['Non_Default %'] = (pivot_df['Non-Defaulter_Count']/non_default_sum).apply('{0:.2%}'.format)
+
+
+#####creating the cumulative sums
+pivot_df['default_cum%'] = np.round(((pivot_df['Defaulter_Count'] / pivot_df['Defaulter_Count'].sum()).cumsum()), 4) * 100
+
+
+#####adding Base value
+pivot_df['Base %'] = [10,20,30,40,50,60,70,80,90,100] ######### enogh for gain chart
+
+#########LIFT CHART ######################
+pivot_df['lift'] = (pivot_df['default_cum%']/pivot_df['Base %'])
+# final2['lift_test'] = (final['default_cum%_test']/final['Base %'])
+pivot_df['Baseline']  = [1,1,1,1,1,1,1,1,1,1]
+pivot_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+predictions_rfc = predictions
+final_columns = ['LABEL_PRED','PREDICTED_1_PROB','DECILE']
+final_columns_df_rfc = predictions_rfc[final_columns]
+final_columns_df_rfc.head()
+
+final_columns_df_rfc = final_columns_df_rfc.add_suffix('_RFC')
+final_columns_df_rfc.head(10)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# y_pred_2[0:1]
+# y_test_model.head(1)
+pred_proba_lgb = pd.DataFrame(predicted_proba_l)
+y_test_rfc = y_test_1.reset_index()
+y_test_rfc_label = y_test_rfc['INACTIVITY_LABEL']
+y_test_rfc_label.head(1)
+
+
+# taking y_pred - predicted probabilities and y_hat -1,0
+y_pred_df=pd.DataFrame(pred_proba_lgb[1]) ### predicted probs
+y_hat_df=pd.DataFrame(y_pred_lgb_2)### 1,0
+
+#combining y_pred_df and y_hat_df and y_test
+predictions=pd.concat([y_test_rfc_label,y_hat_df,y_pred_df],axis=1)
+predictions.columns=['LABEL','LABEL_PRED','PREDICTED_1_PROB']
+predictions['PREDICTED_0_PROB']=1-predictions['PREDICTED_1_PROB']
+predictions['DECILE'] = pd.qcut(predictions['PREDICTED_1_PROB'],10,labels=['1','2','3','4','5','6','7','8','9','10'])
+predictions['LABEL_0']=1-predictions['LABEL']
+
+#creating Pivot table
+pivot_df= pd.pivot_table(data=predictions,index=['DECILE'],values=['LABEL','LABEL_0','PREDICTED_1_PROB'],
+                     aggfunc={'LABEL':[np.sum],
+                              'LABEL_0':[np.sum],
+                              'PREDICTED_1_PROB' : [np.min,np.max]})
+
+##### We now calculate the defaulters and non-defaulters rate per decile.
+
+
+pivot_df.columns = ['Defaulter_Count','Non-Defaulter_Count','max_score','min_score']
+pivot_df['Total_Cust'] = pivot_df['Defaulter_Count']+pivot_df['Non-Defaulter_Count']
+
+pivot_df = pivot_df.sort_values(by='min_score',ascending=False)
+
+pivot_df['Default_Rate'] = (pivot_df['Defaulter_Count'] / pivot_df['Total_Cust']).apply('{0:.2%}'.format)
+default_sum = pivot_df['Defaulter_Count'].sum()
+non_default_sum = pivot_df['Non-Defaulter_Count'].sum()
+pivot_df['Default %'] = (pivot_df['Defaulter_Count']/default_sum).apply('{0:.2%}'.format)
+pivot_df['Non_Default %'] = (pivot_df['Non-Defaulter_Count']/non_default_sum).apply('{0:.2%}'.format)
+
+
+#####creating the cumulative sums
+pivot_df['default_cum%'] = np.round(((pivot_df['Defaulter_Count'] / pivot_df['Defaulter_Count'].sum()).cumsum()), 4) * 100
+
+
+#####adding Base value
+pivot_df['Base %'] = [10,20,30,40,50,60,70,80,90,100] ######### enogh for gain chart
+
+#########LIFT CHART ######################
+pivot_df['lift'] = (pivot_df['default_cum%']/pivot_df['Base %'])
+# final2['lift_test'] = (final['default_cum%_test']/final['Base %'])
+pivot_df['Baseline']  = [1,1,1,1,1,1,1,1,1,1]
+pivot_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+predictions_lgb = predictions
+final_columns = ['LABEL_PRED','PREDICTED_1_PROB','DECILE']
+final_columns_df_lgb = predictions_lgb[final_columns]
+final_columns_df_lgb.head()
+
+final_columns_df_lgb = final_columns_df_lgb.add_suffix('_LGB')
+final_columns_df_lgb.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# y_pred_2[0:1]
+# y_test_model.head(1)
+pred_proba_xgb = pd.DataFrame(predicted_proba_x)
+y_test_rfc = y_test_1.reset_index()
+y_test_rfc_label = y_test_rfc['INACTIVITY_LABEL']
+y_test_rfc_label.head(1)
+
+
+# taking y_pred - predicted probabilities and y_hat -1,0
+y_pred_df=pd.DataFrame(pred_proba_xgb[1]) ### predicted probs
+y_hat_df=pd.DataFrame(y_pred_xgb_2)### 1,0
+
+#combining y_pred_df and y_hat_df and y_test
+predictions=pd.concat([y_test_rfc_label,y_hat_df,y_pred_df],axis=1)
+predictions.columns=['LABEL','LABEL_PRED','PREDICTED_1_PROB']
+predictions['PREDICTED_0_PROB']=1-predictions['PREDICTED_1_PROB']
+predictions['DECILE'] = pd.qcut(predictions['PREDICTED_1_PROB'],10,labels=['1','2','3','4','5','6','7','8','9','10'])
+predictions['LABEL_0']=1-predictions['LABEL']
+
+#creating Pivot table
+pivot_df= pd.pivot_table(data=predictions,index=['DECILE'],values=['LABEL','LABEL_0','PREDICTED_1_PROB'],
+                     aggfunc={'LABEL':[np.sum],
+                              'LABEL_0':[np.sum],
+                              'PREDICTED_1_PROB' : [np.min,np.max]})
+
+##### We now calculate the defaulters and non-defaulters rate per decile.
+
+
+pivot_df.columns = ['Defaulter_Count','Non-Defaulter_Count','max_score','min_score']
+pivot_df['Total_Cust'] = pivot_df['Defaulter_Count']+pivot_df['Non-Defaulter_Count']
+
+pivot_df = pivot_df.sort_values(by='min_score',ascending=False)
+
+pivot_df['Default_Rate'] = (pivot_df['Defaulter_Count'] / pivot_df['Total_Cust']).apply('{0:.2%}'.format)
+default_sum = pivot_df['Defaulter_Count'].sum()
+non_default_sum = pivot_df['Non-Defaulter_Count'].sum()
+pivot_df['Default %'] = (pivot_df['Defaulter_Count']/default_sum).apply('{0:.2%}'.format)
+pivot_df['Non_Default %'] = (pivot_df['Non-Defaulter_Count']/non_default_sum).apply('{0:.2%}'.format)
+
+
+#####creating the cumulative sums
+pivot_df['default_cum%'] = np.round(((pivot_df['Defaulter_Count'] / pivot_df['Defaulter_Count'].sum()).cumsum()), 4) * 100
+
+
+#####adding Base value
+pivot_df['Base %'] = [10,20,30,40,50,60,70,80,90,100] ######### enogh for gain chart
+
+#########LIFT CHART ######################
+pivot_df['lift'] = (pivot_df['default_cum%']/pivot_df['Base %'])
+# final2['lift_test'] = (final['default_cum%_test']/final['Base %'])
+pivot_df['Baseline']  = [1,1,1,1,1,1,1,1,1,1]
+pivot_df
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+predictions_xgb = predictions
+# y_pred
+# y_pred_XGB_1 = pd.DataFrame(y_pred_XGB, columns=['1'])
+# y_pred_XGB_0 = 1 - y_pred_XGB
+# y_pred_XGB_0 = pd.DataFrame(y_pred_XGB_0,columns= ['0'])
+# y_pred_xgb_fin = pd.concat([y_pred_XGB_1,y_pred_XGB_0],axis=1)
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+final_columns = ['LABEL_PRED','PREDICTED_1_PROB','DECILE']
+final_columns_df_xgb = predictions_xgb[final_columns]
+final_columns_df_xgb.head()
+
+final_columns_df_xgb = final_columns_df_xgb.add_suffix('_XGB')
+final_columns_df_xgb.head()
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+# # y_pred_2[0:1]
+# # y_test_model.head(1)
+# pred_proba_xgb = pd.DataFrame(predicted_proba_x)
+# y_test_rfc = y_test_1.reset_index()
+# y_test_rfc_label = y_test_rfc['INACTIVITY_LABEL']
+# y_test_rfc_label.head(1)
+
+
+# # taking y_pred - predicted probabilities and y_hat -1,0
+# y_pred_df=pd.DataFrame(pred_proba_xgb[1]) ### predicted probs
+# y_hat_df=pd.DataFrame(y_pred_xgb_2)### 1,0
+
+# #combining y_pred_df and y_hat_df and y_test
+# predictions=pd.concat([y_test_rfc_label,y_hat_df,y_pred_df],axis=1)
+# predictions.columns=['LABEL','LABEL_PRED','PREDICTED_1_PROB']
+# predictions['PREDICTED_0_PROB']=1-predictions['PREDICTED_1_PROB']
+# predictions['DECILE'] = pd.qcut(predictions['PREDICTED_1_PROB'],20,labels=['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])
+# predictions['LABEL_0']=1-predictions['LABEL']
+
+# #creating Pivot table
+# pivot_df= pd.pivot_table(data=predictions,index=['DECILE'],values=['LABEL','LABEL_0','PREDICTED_1_PROB'],
+#                      aggfunc={'LABEL':[np.sum],
+#                               'LABEL_0':[np.sum],
+#                               'PREDICTED_1_PROB' : [np.min,np.max]})
+
+# ##### We now calculate the defaulters and non-defaulters rate per decile.
